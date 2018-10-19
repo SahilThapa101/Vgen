@@ -52,7 +52,7 @@ u64 gen_attacks(u32 *move_list, u8 pos, u8 color) {
 u64 gen_special_moves(u32 *move_list, u8 pos, u8 color) {
 
 	//pos = gen_castling_moves(move_list, pos, color);
-	//pos = gen_enpassant_moves(move_list, pos, color);
+	pos = gen_enpassant_moves(move_list, pos, color);
 	//pos = gen_promotions(move_list, pos, color);
 
 	return pos;
@@ -689,18 +689,31 @@ u64 gen_castling_moves(u32 *move_list, u8 pos, u8 color) {
 
 u64 gen_enpassant_moves(u32 *move_list, u8 pos, u8 color) {
 
-	if(hist[ply].ep_flag) {
-		u64 ep_sq = hist[ply].ep_sq;
-		u64 target_sqs = ((ep_sq >> 7) << (14 * color)) | ((ep_sq >> 7) << (16 * color));
-		u64 target_pawns = target_sqs & piece_bb[color ^ 1][PAWNS];
+	if(epFlag) {
+
+		u8 from;
+		u8 to;
+		u32 move;
+		u64 target_sqs;
+		u64 target_pawns;
+
+		if(color) {
+			target_sqs = ((epSquare << 7) & NOT_H_FILE) | ((epSquare << 9) & NOT_A_FILE);
+		} else {
+			target_sqs = ((epSquare >> 7) & NOT_A_FILE) | ((epSquare >> 9) & NOT_H_FILE);
+		}
+
+		target_pawns = target_sqs & piece_bb[color][PAWNS];
 
 		while(target_pawns) {
-			const u8 from = bit_scan_forward(target_pawns);
-			target_pawns &= target_pawns - 1;
 
-			const u8 to = ep_sq;
-			u32 move = create_move(0, 0, 3, color, PAWNS, PAWNS, from, to);
+			from = bit_scan_forward(target_pawns);
+			to = epSquare;
+
+			move = create_move(0, 0, 3, color, PAWNS, PAWNS, from, to);
 			move_list[pos++] = move;
+
+			target_pawns &= target_pawns - 1;
 		}
 	}
 

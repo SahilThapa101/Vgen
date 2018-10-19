@@ -20,207 +20,6 @@
 
 u8 COLOR;
 
-u64 returnBB(int sq) {
-	u64 bb;
-	switch (sq) {
-	case 0:
-		bb = 0x0000000000000001U;
-		break;
-	case 1:
-		bb = 0x0000000000000002U;
-		break;
-	case 2:
-		bb = 0x0000000000000004U;
-		break;
-	case 3:
-		bb = 0x0000000000000008U;
-		break;
-	case 4:
-		bb = 0x0000000000000010U;
-		break;
-	case 5:
-		bb = 0x0000000000000020U;
-		break;
-	case 6:
-		bb = 0x0000000000000040U;
-		break;
-	case 7:
-		bb = 0x0000000000000080U;
-		break;
-	case 8:
-		bb = 0x0000000000000100U;
-		break;
-	case 9:
-		bb = 0x0000000000000200U;
-		break;
-	case 10:
-		bb = 0x0000000000000400U;
-		break;
-	case 11:
-		bb = 0x0000000000000800U;
-		break;
-	case 12:
-		bb = 0x0000000000001000U;
-		break;
-	case 13:
-		bb = 0x0000000000002000U;
-		break;
-	case 14:
-		bb = 0x0000000000004000U;
-		break;
-	case 15:
-		bb = 0x0000000000008000U;
-		break;
-	case 16:
-		bb = 0x0000000000010000U;
-		break;
-	case 17:
-		bb = 0x0000000000020000U;
-		break;
-	case 18:
-		bb = 0x0000000000040000U;
-		break;
-	case 19:
-		bb = 0x0000000000080000U;
-		break;
-	case 20:
-		bb = 0x0000000000100000U;
-		break;
-	case 21:
-		bb = 0x0000000000200000U;
-		break;
-	case 22:
-		bb = 0x0000000000400000U;
-		break;
-	case 23:
-		bb = 0x0000000000800000U;
-		break;
-	case 24:
-		bb = 0x0000000001000000U;
-		break;
-	case 25:
-		bb = 0x0000000002000000U;
-		break;
-	case 26:
-		bb = 0x0000000004000000U;
-		break;
-	case 27:
-		bb = 0x0000000008000000U;
-		break;
-	case 28:
-		bb = 0x0000000010000000U;
-		break;
-	case 29:
-		bb = 0x0000000020000000U;
-		break;
-	case 30:
-		bb = 0x0000000040000000U;
-		break;
-	case 31:
-		bb = 0x0000000080000000U;
-		break;
-	case 32:
-		bb = 0x0000000100000000U;
-		break;
-	case 33:
-		bb = 0x0000000200000000U;
-		break;
-	case 34:
-		bb = 0x0000000400000000U;
-		break;
-	case 35:
-		bb = 0x0000000800000000U;
-		break;
-	case 36:
-		bb = 0x0000001000000000U;
-		break;
-	case 37:
-		bb = 0x0000002000000000U;
-		break;
-	case 38:
-		bb = 0x0000004000000000U;
-		break;
-	case 39:
-		bb = 0x0000008000000000U;
-		break;
-	case 40:
-		bb = 0x0000010000000000U;
-		break;
-	case 41:
-		bb = 0x0000020000000000U;
-		break;
-	case 42:
-		bb = 0x0000040000000000U;
-		break;
-	case 43:
-		bb = 0x0000080000000000U;
-		break;
-	case 44:
-		bb = 0x0000100000000000U;
-		break;
-	case 45:
-		bb = 0x0000200000000000U;
-		break;
-	case 46:
-		bb = 0x0000400000000000U;
-		break;
-	case 47:
-		bb = 0x0000800000000000U;
-		break;
-	case 48:
-		bb = 0x0001000000000000U;
-		break;
-	case 49:
-		bb = 0x0002000000000000U;
-		break;
-	case 50:
-		bb = 0x0004000000000000U;
-		break;
-	case 51:
-		bb = 0x0008000000000000U;
-		break;
-	case 52:
-		bb = 0x0010000000000000U;
-		break;
-	case 53:
-		bb = 0x0020000000000000U;
-		break;
-	case 54:
-		bb = 0x0040000000000000U;
-		break;
-	case 55:
-		bb = 0x0080000000000000U;
-		break;
-	case 56:
-		bb = 0x0100000000000000U;
-		break;
-	case 57:
-		bb = 0x0200000000000000U;
-		break;
-	case 58:
-		bb = 0x0400000000000000U;
-		break;
-	case 59:
-		bb = 0x0800000000000000U;
-		break;
-	case 60:
-		bb = 0x1000000000000000U;
-		break;
-	case 61:
-		bb = 0x2000000000000000U;
-		break;
-	case 62:
-		bb = 0x4000000000000000U;
-		break;
-	case 63:
-		bb = 0x8000000000000000U;
-		break;
-	default:
-		break;
-	}
-	return bb;
-}
-
 typedef void (*split_fn)(const char *, size_t, void *);
 
 void split(const char *str, char sep, split_fn fun, void *data) {
@@ -290,7 +89,7 @@ void clearAllBitBoards() {
 //	print_bb(piece_bb[BLACK][KING]);
 }
 
-void splitTheFENPlease() {
+void splitTheFEN() {
 
 	int len = 0;
 	char str[100];
@@ -313,6 +112,14 @@ void splitTheFENPlease() {
 		COLOR = WHITE;
 		break;
 	}
+
+//	char* checkEpSquare = ((char*) (d_array->buffer[3]));
+//
+//	if(checkEpSquare[0] != '-') {
+//		epFlag = 1;
+//		epSquare = 0x0000080000000000U;
+//		printf("%s, %10llu", checkEpSquare, (unsigned long long)epSquare);
+//	}
 
 	printf("Side to move : %s\n", COLOR == 0 ? "WHITE" : "BLACK");
 
@@ -452,6 +259,7 @@ void splitTheFENPlease() {
 			| piece_bb[WHITE][KING] | piece_bb[WHITE][QUEEN]
 			| piece_bb[WHITE][BISHOPS] | piece_bb[WHITE][KNIGHTS]
 			| piece_bb[WHITE][ROOKS] | piece_bb[WHITE][PAWNS];
+
 	empty = ~occupied;
 
 	print_board(occupied);
@@ -470,11 +278,9 @@ int main(int argc, char **argv) {
 	init_knight_attacks();
 	init_magic_moves();
 
-	splitTheFENPlease();
+	splitTheFEN();
 
-	int depth = 0;
-
-	depth = atoi(argv[1]);
+	u8 depth = atoi(argv[1]);
 
 	printf("Depth = %d\n", depth);
 
@@ -488,17 +294,23 @@ int main(int argc, char **argv) {
 
 	hist[ply] = hist_add;
 
+	printf("\n");
+
+	const u8 SIDE_TO_MOVE = COLOR;
+
+	//divide(depth, SIDE_TO_MOVE);
+	startPerft(SIDE_TO_MOVE, depth);
+
+	return 0;
+}
+
+void startPerft(u8 side, u8 depth)  {
+
 	u8 i;
 	u64 nodes;
 
-	printf("\n");
-
-	//divide(depth, COLOR);
-
 	clock_t start1, end1;
 	double cpu_time_used;
-
-	const u8 SIDE_TO_MOVE = COLOR;
 	double nps;
 
 	for (int i = 1; i <= depth; i++) {
@@ -511,13 +323,15 @@ int main(int argc, char **argv) {
 		check = 0;
 		ply = 0;
 
+		epFlag = 0;
+
 		struct hist defaultHist = { 0, 0, 0, 0 };
 
 		hist[ply] = defaultHist;
 
 		start1 = clock();
 
-		nodes = perft(i, SIDE_TO_MOVE);
+		nodes = perft(i, side);
 
 		end1 = clock();
 
@@ -525,10 +339,8 @@ int main(int argc, char **argv) {
 		nps = (double)(nodes / (cpu_time_used * 1000000));
 		printf("Depth(%d)=   ", i);
 		printf(
-				"%8llu (%.3f sec), color - %s, quiet - %8llu, captures - %8llu, en - %6llu, cas - %6llu, checks - %8llu, %.3f MN/s\n",
-				nodes, cpu_time_used, ((SIDE_TO_MOVE == 0) ? "WHITE" : "BLACK"), quiet, cap, en, cas, check, nps);
+				"%10llu (%8.3f sec), color - %s, captures - %8llu, en - %6llu, cas - %6llu, checks - %8llu, %7.3f MN/s\n",
+				nodes, cpu_time_used, ((side == 0) ? "WHITE" : "BLACK"), cap, en, cas, check, nps);
 	}
-
-	return 0;
 }
 

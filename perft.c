@@ -24,14 +24,14 @@ u64 perft(u8 depth, u8 color) {
 	n_moves = gen_moves(move_list, COLOR);
 
 	for (i = 0; i < n_moves; i++) {
-		ply++;
+//		ply++;
 
-		u32 move = move_list[i];
-		hist_add.move = move;
-		hist_add.ep_sq = hist[ply - 1].ep_sq;
-		hist_add.ep_flag = hist[ply - 1].ep_flag;
-		hist_add.castle_flags = hist[ply - 1].castle_flags;
-		hist[ply] = hist_add;
+//		u32 move = move_list[i];
+//		hist_add.move = move;
+//		hist_add.ep_sq = hist[ply - 1].ep_sq;
+//		hist_add.ep_flag = hist[ply - 1].ep_flag;
+//		hist_add.castle_flags = hist[ply - 1].castle_flags;
+//		hist[ply] = hist_add;
 
 //		hist[ply] = defaultHist;
 
@@ -43,8 +43,9 @@ u64 perft(u8 depth, u8 color) {
 			check++;
 		}
 
+		epFlag = 0;
 		unmake_move(move_list[i]);
-		ply--;
+//		ply--;
 
 	}
 

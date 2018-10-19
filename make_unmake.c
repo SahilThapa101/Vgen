@@ -17,6 +17,8 @@ void make_move(u32 move) {
 	c_piece = c_piece_type(move);
 	color = color_type(move);
 
+	epFlag = 0;
+
 	switch(move_type(move)) {
 	
 		case 0 : 
@@ -83,37 +85,16 @@ void make_move(u32 move) {
 					occupied ^= from_bb;
 					empty ^= from_bb;
 
-					// why this castling stuff here
-/*
-					switch(color) {
-						case 0: 
-								if(c_piece == ROOKS) {
-									if(to_bb == 0U)
-										hist[ply].castle_flags &= 0x1110;
-									else
-										hist[ply].castle_flags &= 0x1101;
-								}
-
-								break;
-
-						case 1: 
-								if(c_piece == ROOKS) {
-									if(to_bb == 0x0100000000000000U)
-										hist[ply].castle_flags &= 0x1011;
-									else
-										hist[ply].castle_flags &= 0x0111;
-								}
-
-								break;
-					}
-*/
 					break;
 	
 		case 2 : 
 					quiet++;
 					
-					hist[ply].ep_sq = (from_bb << 8) >> 16 * color;
-					hist[ply].ep_flag = 1;
+					epSquare =  (from_bb << 8) >> 16 * color;
+					epFlag = 1;
+
+//					hist[ply].ep_sq = (from_bb << 8) >> 16 * color;
+//					hist[ply].ep_flag = 1;
 
 					piece_bb[color][piece] ^= from_to_bb;
 					piece_bb[color][PIECES] ^= from_to_bb;
@@ -126,14 +107,20 @@ void make_move(u32 move) {
 		case 3 :	
 					en++;
 
-					piece_bb[color][piece] ^= from_to_bb;
+					//  en_passant capture
+
+					piece_bb[color][PAWNS] ^= from_to_bb;
 					piece_bb[color][PIECES] ^= from_to_bb;
 
-					piece_bb[color ^ 1][c_piece] ^= (to_bb << 8) >> 16 * (color ^ 1);
-					piece_bb[color ^ 1][PIECES] ^= (to_bb << 8) >> 16 * (color ^ 1);
+					piece_bb[color ^ 1][PAWNS] ^= ((to_bb << 8) >> (16 * color));
+					piece_bb[color ^ 1][PIECES] ^= ((to_bb << 8) >> (16 * color));
 
-					occupied ^= (from_to_bb | (to_bb >> 8) << 16 * (color ^ 1));
-					empty ^= (from_to_bb | (to_bb >> 8) << 16 * (color ^ 1));				
+					occupied ^= (from_to_bb | ((to_bb >> 8) << (16 * color)));
+					empty ^= (from_to_bb | ((to_bb >> 8) << (16 * color)));
+
+//					occupied ^= from_to_bb;
+//					//occupied ^= (((to_bb << 8) >> (16 * color))) | from_bb;
+//					empty = ~occupied;
 
 					break;
 		
@@ -319,7 +306,8 @@ void unmake_move(u32 move) {
 	color = color_type(move);
 
 	switch(move_type(move)) {
-		case 0 :	
+
+		case 0 :
 					piece_bb[color][piece] ^= from_to_bb;
 					piece_bb[color][PIECES] ^= from_to_bb;
 					
@@ -350,11 +338,11 @@ void unmake_move(u32 move) {
 					piece_bb[color][piece] ^= from_to_bb;
 					piece_bb[color][PIECES] ^= from_to_bb;
 
-					piece_bb[color ^ 1][c_piece] ^= (to_bb << 8) >> 16 * (color ^ 1);
-					piece_bb[color ^ 1][PIECES] ^= (to_bb << 8) >> 16 * (color ^ 1);
+					piece_bb[color ^ 1][c_piece] ^= (to_bb << 8) >> (16 * color);
+					piece_bb[color ^ 1][PIECES] ^= (to_bb << 8) >> (16 * color);
 
-					occupied ^= (from_to_bb | (to_bb >> 8) << 16 * (color ^ 1));
-					empty ^= (from_to_bb | (to_bb >> 8) << 16 * (color ^ 1));				
+					occupied ^= (from_to_bb | (to_bb >> 8) << 16 * color);
+					empty ^= (from_to_bb | (to_bb >> 8) << 16 * color);
 
 					break;
 		case 4 :	

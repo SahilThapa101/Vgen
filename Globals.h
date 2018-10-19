@@ -28,6 +28,10 @@ u8 color;
 
 u64 quiet, cap, en, cas, check;
 
+u8 epFlag;
+u64 epSquare;
+
+
 /* pieceBB is an array containing bitboards for all pieces */
 
 u64 piece_bb[2][7]; /* color * (piece_type + pieces of that color) = 2 * 7 = 14 */
