@@ -56,15 +56,19 @@ void readFEN(char* FEN, int len) {
 
 	ch = fgetc(fptr);
 
+	FEN[0] = '[';
+	FEN[1] = ch;
+
 	while (ch != EOF) {
 		ch = fgetc(fptr);
-		FEN[len] = ch;
+		FEN[len + 1] = ch;
 		len++;
 	}
 
-	FEN[len] = '\0';
+	FEN[len] = ']';
+	FEN[len + 1] = '\0';
 
-	printf("%s\n", FEN);
+	printf("FEN : %s\n", FEN);
 	fclose(fptr);
 }
 
@@ -91,10 +95,9 @@ void clearAllBitBoards() {
 
 void splitTheFEN() {
 
-	int len = 0;
 	char str[100];
 
-	readFEN(str, len);
+	readFEN(str, 1);
 
 	dynarray *d_array = dynarray_create(0);
 	dynarray *mainFEN = dynarray_create(0);
