@@ -8,7 +8,7 @@
 void print_bb(u64 board) {
 
 	char *output = malloc(65 * sizeof(char));
-	printf(" ---------- ");
+	printf(" \n ---------- ");
 	int row;
 	int col;
 	for (row = 7; row >= 0; row--) {
@@ -148,204 +148,138 @@ int is_sq_attacked(u8 sq, u8 color) {
 }
 
 u64 returnBB(int sq) {
-	u64 bb;
 	switch (sq) {
 	case 0:
-		bb = 0x0000000000000001U;
-		break;
+		return 0x0000000000000001U;
 	case 1:
-		bb = 0x0000000000000002U;
-		break;
+		return 0x0000000000000002U;
 	case 2:
-		bb = 0x0000000000000004U;
-		break;
+		return 0x0000000000000004U;
 	case 3:
-		bb = 0x0000000000000008U;
-		break;
+		return 0x0000000000000008U;
 	case 4:
-		bb = 0x0000000000000010U;
-		break;
+		return 0x0000000000000010U;
 	case 5:
-		bb = 0x0000000000000020U;
-		break;
+		return 0x0000000000000020U;
 	case 6:
-		bb = 0x0000000000000040U;
-		break;
+		return 0x0000000000000040U;
 	case 7:
-		bb = 0x0000000000000080U;
-		break;
+		return 0x0000000000000080U;
 	case 8:
-		bb = 0x0000000000000100U;
-		break;
+		return 0x0000000000000100U;
 	case 9:
-		bb = 0x0000000000000200U;
-		break;
+		return 0x0000000000000200U;
 	case 10:
-		bb = 0x0000000000000400U;
-		break;
+		return 0x0000000000000400U;
 	case 11:
-		bb = 0x0000000000000800U;
-		break;
+		return 0x0000000000000800U;
 	case 12:
-		bb = 0x0000000000001000U;
-		break;
+		return 0x0000000000001000U;
 	case 13:
-		bb = 0x0000000000002000U;
-		break;
+		return 0x0000000000002000U;
 	case 14:
-		bb = 0x0000000000004000U;
-		break;
+		return 0x0000000000004000U;
 	case 15:
-		bb = 0x0000000000008000U;
-		break;
+		return 0x0000000000008000U;
 	case 16:
-		bb = 0x0000000000010000U;
-		break;
+		return 0x0000000000010000U;
 	case 17:
-		bb = 0x0000000000020000U;
-		break;
+		return 0x0000000000020000U;
 	case 18:
-		bb = 0x0000000000040000U;
-		break;
+		return 0x0000000000040000U;
 	case 19:
-		bb = 0x0000000000080000U;
-		break;
+		return 0x0000000000080000U;
 	case 20:
-		bb = 0x0000000000100000U;
-		break;
+		return 0x0000000000100000U;
 	case 21:
-		bb = 0x0000000000200000U;
-		break;
+		return 0x0000000000200000U;
 	case 22:
-		bb = 0x0000000000400000U;
-		break;
+		return 0x0000000000400000U;
 	case 23:
-		bb = 0x0000000000800000U;
-		break;
+		return 0x0000000000800000U;
 	case 24:
-		bb = 0x0000000001000000U;
-		break;
+		return 0x0000000001000000U;
 	case 25:
-		bb = 0x0000000002000000U;
-		break;
+		return 0x0000000002000000U;
 	case 26:
-		bb = 0x0000000004000000U;
-		break;
+		return 0x0000000004000000U;
 	case 27:
-		bb = 0x0000000008000000U;
-		break;
+		return 0x0000000008000000U;
 	case 28:
-		bb = 0x0000000010000000U;
-		break;
+		return 0x0000000010000000U;
 	case 29:
-		bb = 0x0000000020000000U;
-		break;
+		return 0x0000000020000000U;
 	case 30:
-		bb = 0x0000000040000000U;
-		break;
+		return 0x0000000040000000U;
 	case 31:
-		bb = 0x0000000080000000U;
-		break;
+		return 0x0000000080000000U;
 	case 32:
-		bb = 0x0000000100000000U;
-		break;
+		return 0x0000000100000000U;
 	case 33:
-		bb = 0x0000000200000000U;
-		break;
+		return 0x0000000200000000U;
 	case 34:
-		bb = 0x0000000400000000U;
-		break;
+		return 0x0000000400000000U;
 	case 35:
-		bb = 0x0000000800000000U;
-		break;
+		return 0x0000000800000000U;
 	case 36:
-		bb = 0x0000001000000000U;
-		break;
+		return 0x0000001000000000U;
 	case 37:
-		bb = 0x0000002000000000U;
-		break;
+		return 0x0000002000000000U;
 	case 38:
-		bb = 0x0000004000000000U;
-		break;
+		return 0x0000004000000000U;
 	case 39:
-		bb = 0x0000008000000000U;
-		break;
+		return 0x0000008000000000U;
 	case 40:
-		bb = 0x0000010000000000U;
-		break;
+		return 0x0000010000000000U;
 	case 41:
-		bb = 0x0000020000000000U;
-		break;
+		return 0x0000020000000000U;
 	case 42:
-		bb = 0x0000040000000000U;
-		break;
+		return 0x0000040000000000U;
 	case 43:
-		bb = 0x0000080000000000U;
-		break;
+		return 0x0000080000000000U;
 	case 44:
-		bb = 0x0000100000000000U;
-		break;
+		return 0x0000100000000000U;
 	case 45:
-		bb = 0x0000200000000000U;
-		break;
+		return 0x0000200000000000U;
 	case 46:
-		bb = 0x0000400000000000U;
-		break;
+		return 0x0000400000000000U;
 	case 47:
-		bb = 0x0000800000000000U;
-		break;
+		return 0x0000800000000000U;
 	case 48:
-		bb = 0x0001000000000000U;
-		break;
+		return 0x0001000000000000U;
 	case 49:
-		bb = 0x0002000000000000U;
-		break;
+		return 0x0002000000000000U;
 	case 50:
-		bb = 0x0004000000000000U;
-		break;
+		return 0x0004000000000000U;
 	case 51:
-		bb = 0x0008000000000000U;
-		break;
+		return 0x0008000000000000U;
 	case 52:
-		bb = 0x0010000000000000U;
-		break;
+		return 0x0010000000000000U;
 	case 53:
-		bb = 0x0020000000000000U;
-		break;
+		return 0x0020000000000000U;
 	case 54:
-		bb = 0x0040000000000000U;
-		break;
+		return 0x0040000000000000U;
 	case 55:
-		bb = 0x0080000000000000U;
-		break;
+		return 0x0080000000000000U;
 	case 56:
-		bb = 0x0100000000000000U;
-		break;
+		return 0x0100000000000000U;
 	case 57:
-		bb = 0x0200000000000000U;
-		break;
+		return 0x0200000000000000U;
 	case 58:
-		bb = 0x0400000000000000U;
-		break;
+		return 0x0400000000000000U;
 	case 59:
-		bb = 0x0800000000000000U;
-		break;
+		return 0x0800000000000000U;
 	case 60:
-		bb = 0x1000000000000000U;
-		break;
+		return 0x1000000000000000U;
 	case 61:
-		bb = 0x2000000000000000U;
-		break;
+		return 0x2000000000000000U;
 	case 62:
-		bb = 0x4000000000000000U;
-		break;
+		return 0x4000000000000000U;
 	case 63:
-		bb = 0x8000000000000000U;
-		break;
-	default:
-		break;
+		return 0x8000000000000000U;
 	}
-	return bb;
+
+	return 0U;
 }
 
 char* algebricPos(u8 sq) {
@@ -642,28 +576,45 @@ int divide(u8 depth, u8 color) {
 
 	u64 total_nodes = 0;
 	u64 piece;
+	u8 moveType;
 	u64 nodes;
-	for (u8 i = 0; i < gen_moves(move_list, color); i++) {
+	u8 sideToMove = color;
+
+	u32 noOfMoves = gen_moves(move_list, sideToMove);
+	u8 count = 0;
+
+	for (u8 i = 0; i < noOfMoves; i++) {
 
 		//ply=ply+1;
 
 		make_move(move_list[i]);
 		piece = piece_type(move_list[i]);
+		moveType = move_type(move_list[i]);
 		nodes = 0;
 
-		if (!is_sq_attacked(bit_scan_forward(piece_bb[color][KING]), color)) {
-			printf("%d  %c%s-%s -> ", i + 1, pieceName[color][piece],
+		if(moveType == 3) {
+			print_bb(piece_bb[0][PIECES] | piece_bb[1][PIECES]);
+		}
+
+		if (is_sq_attacked(bit_scan_forward(piece_bb[sideToMove][KING]), sideToMove)) {
+			// King is in check
+		} else {
+			count++;
+
+			printf("%d  %c%s-%s -> ", count, pieceName[sideToMove][piece],
 					algebricPos(from_sq(move_list[i])),
 					algebricPos(to_sq(move_list[i])));
 
-			nodes = perft(depth - 1, color ^ 1);
+			if(sideToMove == WHITE)
+				nodes = perft(depth - 1, BLACK);
+			else
+				nodes = perft(depth - 1, WHITE);
 
 			total_nodes = total_nodes + nodes;
-			printf("%llu\n", nodes);
+			printf("%llu, Move type  - %d\n", nodes, moveType);
 		}
 
 		unmake_move(move_list[i]);
-		epFlag = 0;
 
 		//ply = ply - 1;
 	}

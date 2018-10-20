@@ -113,13 +113,12 @@ void splitTheFEN() {
 		break;
 	}
 
-//	char* checkEpSquare = ((char*) (d_array->buffer[3]));
-//
-//	if(checkEpSquare[0] != '-') {
-//		epFlag = 1;
-//		epSquare = 0x0000080000000000U;
-//		printf("%s, %10llu", checkEpSquare, (unsigned long long)epSquare);
-//	}
+	char* checkEpSquare = ((char*) (d_array->buffer[3]));
+
+	if(checkEpSquare[0] != '-') {
+		epFlag = 1;
+		epSquare = bbFromAlgebricPos(checkEpSquare);
+	}
 
 	printf("Side to move : %s\n", COLOR == 0 ? "WHITE" : "BLACK");
 
@@ -280,7 +279,8 @@ int main(int argc, char **argv) {
 
 	splitTheFEN();
 
-	u8 depth = atoi(argv[1]);
+	char* arg1 = argv[1];
+	u8 depth = atoi(argv[2]);
 
 	printf("Depth = %d\n", depth);
 
@@ -298,8 +298,10 @@ int main(int argc, char **argv) {
 
 	const u8 SIDE_TO_MOVE = COLOR;
 
-	//divide(depth, SIDE_TO_MOVE);
-	startPerft(SIDE_TO_MOVE, depth);
+	if(strcmp(arg1, "perft") == 0)
+		startPerft(SIDE_TO_MOVE, depth);
+	else if(strcmp(arg1, "divide") == 0)
+		divide(depth, SIDE_TO_MOVE);
 
 	return 0;
 }
@@ -322,8 +324,6 @@ void startPerft(u8 side, u8 depth)  {
 		cas = 0;
 		check = 0;
 		ply = 0;
-
-		epFlag = 0;
 
 		struct hist defaultHist = { 0, 0, 0, 0 };
 
