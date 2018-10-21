@@ -5,6 +5,9 @@
 
 void make_move(u32 move) {
 
+	u8 fromSq = from_sq(move);
+	u8 toSq = to_sq(move);
+
 	u64 from_bb, to_bb, from_to_bb, piece, c_piece;
 
 	from_bb = index_bb[from_sq(move)];
@@ -16,7 +19,7 @@ void make_move(u32 move) {
 	c_piece = c_piece_type(move);
 	color = color_type(move);
 
-	epFlag = 0;
+	moveStack[ply].epFlag = 0;
 
 	switch (move_type(move)) {
 
@@ -28,54 +31,25 @@ void make_move(u32 move) {
 		occupied ^= from_to_bb;
 		empty ^= from_to_bb;
 
-		/*switch(color) {
-		 case 0:
-		 if(castling_rights[0]) {
-		 switch(piece) {
+		moveStack[ply].prevCastleFlags = moveStack[ply].castleFlags;
 
-		 case KING:	hist[ply].castle_flags &= 0x1100;
-		 castling_rights[0] = 0;
-
-		 break;
-
-		 case ROOKS:
-		 if(from_bb == 0)
-		 hist[ply].castle_flags &= 0x1110;
-		 else
-		 hist[ply].castle_flags &= 0x1101;
-
-		 break;
-		 }
-		 }
-
-		 break;
-
-		 case 1:
-		 if(castling_rights[1]) {
-		 switch(piece) {
-
-		 case KING:	hist[ply].castle_flags &= 0x0011;
-		 castling_rights[1] = 0;
-
-		 break;
-
-		 case ROOKS:
-		 if(from_bb == 0x0100000000000000)
-		 hist[ply].castle_flags &= 0x1011;
-		 else
-		 hist[ply].castle_flags &= 0x0111;
-
-		 break;
-		 }
-		 }
-
-		 break;
-		 }*/
+		// update castle flags
+		if (piece == KING) {
+			if (color == WHITE) {
+				moveStack[ply].castleFlags &= ~(CastleFlagWhiteKing
+						| CastleFlagWhiteQueen);
+			} else {
+				moveStack[ply].castleFlags &= ~(CastleFlagBlackKing
+						| CastleFlagBlackQueen);
+			}
+		} else if (piece == ROOKS) {
+			moveStack[ply].castleFlags &= rookCastleFlagMask[fromSq];
+		}
 
 		break;
-
 	case 1:
 		cap++;
+
 		piece_bb[color][piece] ^= from_to_bb;
 		piece_bb[color][PIECES] ^= from_to_bb;
 		piece_bb[color ^ 1][c_piece] ^= to_bb;
@@ -84,16 +58,33 @@ void make_move(u32 move) {
 		occupied ^= from_bb;
 		empty ^= from_bb;
 
+		moveStack[ply].prevCastleFlags = moveStack[ply].castleFlags;
+
+		// update castle flags
+		if (piece == KING) {
+			if (color == WHITE) {
+				moveStack[ply].castleFlags &= ~(CastleFlagWhiteKing
+						| CastleFlagWhiteQueen);
+			} else {
+				moveStack[ply].castleFlags &= ~(CastleFlagBlackKing
+						| CastleFlagBlackQueen);
+			}
+		} else if (piece == ROOKS) {
+			moveStack[ply].castleFlags &= rookCastleFlagMask[fromSq];
+		}
+
+		if(c_piece == ROOKS) {
+			moveStack[ply].castleFlags &= rookCastleFlagMask[toSq];
+		}
+
 		break;
 
 	case 2:
 		quiet++;
+		// pawn double pushes
 
-		epSquare = (from_bb << 8) >> 16 * color;
-		epFlag = 1;
-
-//					hist[ply].ep_sq = (from_bb << 8) >> 16 * color;
-//					hist[ply].ep_flag = 1;
+		moveStack[ply].epFlag = 1;
+		moveStack[ply].epSquare = (from_bb << 8) >> 16 * color;
 
 		piece_bb[color][piece] ^= from_to_bb;
 		piece_bb[color][PIECES] ^= from_to_bb;
@@ -141,95 +132,85 @@ void make_move(u32 move) {
 	case 4:
 		cas++;
 
-		switch (castle_dir(move)) {
-		case 0:
-			if (!(is_sq_attacked(1, color) & is_sq_attacked(2, color)
-					& is_sq_attacked(3, color))) {
+		u8 castleDirection = castle_dir(move);
 
-				hist[ply].castle_flags &= 0x1110;
-				castling_rights[0] = 0;
+		moveStack[ply].prevCastleFlags = moveStack[ply].castleFlags;
 
-				piece_bb[color][piece] ^= from_to_bb;
+		if (color == WHITE) {
+			moveStack[ply].castleFlags &= ~(CastleFlagWhiteKing
+					| CastleFlagWhiteQueen);
 
-				piece_bb[color][c_piece] ^= (0x0000 ^ 0x0008);
+			if (castleDirection == WHITE_CASTLE_QUEEN_SIDE) {
 
-				piece_bb[color][PIECES] &= ~0x0000000000000011U;
-				piece_bb[color][PIECES] |= 0x000000000000000CU;
+				moveStack[ply].castleFlags &= rookCastleFlagMask[0];
 
-				occupied = piece_bb[color][PIECES]
-						| piece_bb[color ^ 1][PIECES];
-				empty = ~occupied;
+				//clear out king and rook
+				piece_bb[WHITE][piece] ^= 0x0000000000000010U;
+				piece_bb[WHITE][c_piece] ^= 0x0000000000000001U;
 
+				// set king and rook
+				piece_bb[WHITE][piece] ^= 0x0000000000000004U;
+				piece_bb[WHITE][c_piece] ^= 0x0000000000000008U;
+
+				// update pieces
+				piece_bb[WHITE][PIECES] ^= 0x0000000000000011U;
+				piece_bb[WHITE][PIECES] ^= 0x000000000000000CU;
+			} else if (castleDirection == WHITE_CASTLE_KING_SIDE) {
+
+				moveStack[ply].castleFlags &= rookCastleFlagMask[7];
+
+				//clear out king and rook
+				piece_bb[WHITE][piece] ^= 0x0000000000000010U;
+				piece_bb[WHITE][c_piece] ^= 0x0000000000000080U;
+
+				// set king and rook
+				piece_bb[WHITE][piece] ^= 0x0000000000000040U;
+				piece_bb[WHITE][c_piece] ^= 0x0000000000000020U;
+
+				// update pieces
+				piece_bb[WHITE][PIECES] ^= 0x0000000000000090U;
+				piece_bb[WHITE][PIECES] ^= 0x0000000000000060U;
 			}
+		} else {
 
-			break;
+			moveStack[ply].castleFlags &= ~(CastleFlagBlackKing
+							| CastleFlagBlackQueen);
 
-		case 1:
-			if (!(is_sq_attacked(5, color) & is_sq_attacked(6, color))) {
+			if (castleDirection == BLACK_CASTLE_QUEEN_SIDE) {
+				moveStack[ply].castleFlags &= rookCastleFlagMask[56];
 
-				hist[ply].castle_flags &= 0x1101;
-				castling_rights[0] = 0;
+				//clear out king and rook
+				piece_bb[BLACK][piece] ^= 0x1000000000000000U;
+				piece_bb[BLACK][c_piece] ^= 0x0100000000000000U;
 
-				piece_bb[color][piece] ^= from_to_bb;
+				// set king and rook
+				piece_bb[BLACK][piece] ^= 0x0400000000000000U;
+				piece_bb[BLACK][c_piece] ^= 0x0800000000000000U;
 
-				piece_bb[color][c_piece] ^= (0x0080U ^ 0x0020U);
+				// update pieces
+				piece_bb[BLACK][PIECES] ^= 0x1100000000000000U;
+				piece_bb[BLACK][PIECES] ^= 0x0C00000000000000U;
 
-				piece_bb[color][PIECES] &= ~0x0000000000000090U;
-				piece_bb[color][PIECES] |= 0x0000000000000060U;
+			} else if (castleDirection == BLACK_CASTLE_KING_SIDE) {
 
-				occupied = piece_bb[color][PIECES]
-						| piece_bb[color ^ 1][PIECES];
-				empty = ~occupied;
+				moveStack[ply].castleFlags &= rookCastleFlagMask[63];
 
+				//clear out king and rook
+				piece_bb[BLACK][piece] ^= 0x1000000000000000U;
+				piece_bb[BLACK][c_piece] ^= 0x8000000000000000U;
+
+				// set king and rook
+				piece_bb[BLACK][piece] ^= 0x4000000000000000U;
+				piece_bb[BLACK][c_piece] ^= 0x2000000000000000U;
+
+				// update pieces
+				piece_bb[BLACK][PIECES] ^= 0x9000000000000000U;
+				piece_bb[BLACK][PIECES] ^= 0x6000000000000000U;
 			}
-
-			break;
-
-		case 2:
-			if (!(is_sq_attacked(57, color) & is_sq_attacked(58, color)
-					& is_sq_attacked(59, color))) {
-
-				hist[ply].castle_flags &= 0x1011;
-				castling_rights[1] = 0;
-
-				piece_bb[color][piece] ^= from_to_bb;
-
-				piece_bb[color][c_piece] ^= (0x0100000000000000U
-						^ 0x0800000000000000U);
-
-				piece_bb[color][PIECES] &= ~0x1100000000000000U;
-				piece_bb[color][PIECES] |= 0x0C00000000000000U;
-
-				occupied = piece_bb[color][PIECES]
-						| piece_bb[color ^ 1][PIECES];
-				empty = ~occupied;
-
-			}
-
-			break;
-
-		case 3:
-			if (!(is_sq_attacked(61, color) & is_sq_attacked(62, color))) {
-
-				hist[ply].castle_flags &= 0x0111;
-				castling_rights[1] = 0;
-
-				piece_bb[color][piece] ^= from_to_bb;
-
-				piece_bb[color][c_piece] ^= (0x8000000000000000U
-						^ 0x2000000000000000U);
-
-				piece_bb[color][PIECES] &= ~0x9000000000000000U;
-				piece_bb[color][PIECES] |= 0x6000000000000000U;
-
-				occupied = piece_bb[color][PIECES]
-						| piece_bb[color ^ 1][PIECES];
-				empty = ~occupied;
-
-			}
-
-			break;
 		}
+
+		occupied = piece_bb[WHITE][PIECES] | piece_bb[BLACK][PIECES];
+		empty = ~occupied;
 
 		break;
 
@@ -316,6 +297,8 @@ void make_move(u32 move) {
 void unmake_move(u32 move) {
 	u64 from_bb, to_bb, from_to_bb, piece, c_piece, color;
 
+	u8 castleDirection = castle_dir(move);
+
 	from_bb = index_bb[from_sq(move)];
 	to_bb = index_bb[to_sq(move)];
 
@@ -325,8 +308,6 @@ void unmake_move(u32 move) {
 	c_piece = c_piece_type(move);
 	color = color_type(move);
 
-	epFlag = 0;
-
 	switch (move_type(move)) {
 
 	case 0:
@@ -335,6 +316,8 @@ void unmake_move(u32 move) {
 
 		occupied ^= from_to_bb;
 		empty ^= from_to_bb;
+
+		moveStack[ply].castleFlags = moveStack[ply].prevCastleFlags;
 
 		break;
 	case 1:
@@ -346,6 +329,8 @@ void unmake_move(u32 move) {
 
 		occupied ^= from_bb;
 		empty ^= from_bb;
+
+		moveStack[ply].castleFlags = moveStack[ply].prevCastleFlags;
 
 		break;
 	case 2:
@@ -390,69 +375,55 @@ void unmake_move(u32 move) {
 
 		break;
 	case 4:
-		switch (castle_dir(move)) {
-		case 0:
-			castling_rights[0] = 1;
 
-			piece_bb[color][piece] ^= from_to_bb;
+		if (castleDirection == WHITE_CASTLE_QUEEN_SIDE) {
 
-			piece_bb[color][c_piece] ^= (0x0000 ^ 0x0008);
+			// clear king and rook
+			piece_bb[WHITE][piece] ^= 0x0000000000000004U;
+			piece_bb[WHITE][c_piece] ^= 0x0000000000000008U;
 
-			piece_bb[color][PIECES] &= 0x000000000000000CU;
-			piece_bb[color][PIECES] |= ~0x0000000000000011U;
+			//set king and rook
+			piece_bb[WHITE][piece] ^= 0x0000000000000010U;
+			piece_bb[WHITE][c_piece] ^= 0x0000000000000001U;
 
-			occupied = piece_bb[color][PIECES] | piece_bb[color ^ 1][PIECES];
-			empty = ~occupied;
+			// update pieces
+			piece_bb[WHITE][PIECES] ^= 0x000000000000000CU;
+			piece_bb[WHITE][PIECES] ^= 0x0000000000000011U;
+		} else if (castleDirection == WHITE_CASTLE_KING_SIDE) {
 
-			break;
+			piece_bb[WHITE][piece] ^= 0x0000000000000040U;
+			piece_bb[WHITE][c_piece] ^= 0x0000000000000020U;
 
-		case 1:
-			castling_rights[0] = 1;
+			piece_bb[WHITE][piece] ^= 0x0000000000000010U;
+			piece_bb[WHITE][c_piece] ^= 0x0000000000000080U;
 
-			piece_bb[color][piece] ^= from_to_bb;
+			piece_bb[WHITE][PIECES] ^= 0x0000000000000060U;
+			piece_bb[WHITE][PIECES] ^= 0x0000000000000090U;
+		} else if (castleDirection == BLACK_CASTLE_QUEEN_SIDE) {
 
-			piece_bb[color][c_piece] ^= (0x0080U ^ 0x0020U);
+			piece_bb[BLACK][piece] ^= 0x0400000000000000U;
+			piece_bb[BLACK][c_piece] ^= 0x0800000000000000U;
 
-			piece_bb[color][PIECES] &= 0x0000000000000060U;
-			piece_bb[color][PIECES] |= ~0x0000000000000090U;
+			piece_bb[BLACK][piece] ^= 0x1000000000000000U;
+			piece_bb[BLACK][c_piece] ^= 0x0100000000000000U;
 
-			occupied = piece_bb[color][PIECES] | piece_bb[color ^ 1][PIECES];
-			empty = ~occupied;
+			piece_bb[BLACK][PIECES] ^= 0x0C00000000000000U;
+			piece_bb[BLACK][PIECES] ^= 0x1100000000000000U;
 
-			break;
+		} else if (castleDirection == BLACK_CASTLE_KING_SIDE) {
 
-		case 2:
-			castling_rights[1] = 1;
+			piece_bb[BLACK][piece] ^= 0x4000000000000000U;
+			piece_bb[BLACK][c_piece] ^= 0x2000000000000000U;
 
-			piece_bb[color][piece] ^= from_to_bb;
+			piece_bb[BLACK][piece] ^= 0x1000000000000000U;
+			piece_bb[BLACK][c_piece] ^= 0x8000000000000000U;
 
-			piece_bb[color][c_piece] ^= (0x0100000000000000U
-					^ 0x0800000000000000U);
-
-			piece_bb[color][PIECES] &= 0x0C00000000000000U;
-			piece_bb[color][PIECES] |= ~0x1100000000000000U;
-
-			occupied = piece_bb[color][PIECES] | piece_bb[color ^ 1][PIECES];
-			empty = ~occupied;
-
-			break;
-
-		case 3:
-			castling_rights[1] = 1;
-
-			piece_bb[color][piece] ^= from_to_bb;
-
-			piece_bb[color][c_piece] ^= (0x8000000000000000U
-					^ 0x2000000000000000U);
-
-			piece_bb[color][PIECES] &= 0x6000000000000000U;
-			piece_bb[color][PIECES] |= ~0x9000000000000000U;
-
-			occupied = piece_bb[color][PIECES] | piece_bb[color ^ 1][PIECES];
-			empty = ~occupied;
-
-			break;
+			piece_bb[BLACK][PIECES] ^= 0x6000000000000000U;
+			piece_bb[BLACK][PIECES] ^= 0x9000000000000000U;
 		}
+
+		occupied = piece_bb[WHITE][PIECES] | piece_bb[BLACK][PIECES];
+		empty = ~occupied;
 
 		break;
 	case 5:

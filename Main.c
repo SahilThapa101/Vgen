@@ -116,11 +116,37 @@ void splitTheFEN() {
 		break;
 	}
 
+	char* checkCastleFlags = ((char*) (d_array->buffer[2]));
+
+	if (!strcmp(checkCastleFlags, "-") == 0) {
+
+		int len = strlen(checkCastleFlags);
+		u8 flag = 0;
+
+		for (int i = 0; i < len; i++) {
+			if (checkCastleFlags[i] == 'K') {
+
+				flag |= CastleFlagWhiteKing;
+			} else if (checkCastleFlags[i] == 'k') {
+
+				flag |= CastleFlagBlackKing;
+			} else if (checkCastleFlags[i] == 'Q') {
+
+				flag |= CastleFlagWhiteQueen;
+			} else if (checkCastleFlags[i] == 'q') {
+
+				flag |= CastleFlagBlackQueen;
+			}
+		}
+
+		moveStack[0].castleFlags = flag;
+	}
+
 	char* checkEpSquare = ((char*) (d_array->buffer[3]));
 
-	if(checkEpSquare[0] != '-') {
-		epFlag = 1;
-		epSquare = bbFromAlgebricPos(checkEpSquare);
+	if (checkEpSquare[0] != '-') {
+		moveStack[0].epFlag = 1;
+		moveStack[0].epSquare = bbFromAlgebricPos(checkEpSquare);
 	}
 
 	printf("Side to move : %s\n", COLOR == 0 ? "WHITE" : "BLACK");
@@ -272,6 +298,18 @@ void splitTheFEN() {
 	dynarray_delete(mainFEN);
 }
 
+void initCastleMaskAndFlags() {
+
+	for (int i = 0; i < 64; i++) {
+		rookCastleFlagMask[i] = 15;
+	}
+
+	rookCastleFlagMask[0] ^= CastleFlagWhiteQueen;
+	rookCastleFlagMask[7] ^= CastleFlagWhiteKing;
+	rookCastleFlagMask[56] ^= CastleFlagBlackQueen;
+	rookCastleFlagMask[63] ^= CastleFlagBlackKing;
+}
+
 int main(int argc, char **argv) {
 
 	init_piece_bb();
@@ -279,6 +317,7 @@ int main(int argc, char **argv) {
 	init_king_attacks();
 	init_knight_attacks();
 	init_magic_moves();
+	initCastleMaskAndFlags();
 
 	splitTheFEN();
 
@@ -291,30 +330,24 @@ int main(int argc, char **argv) {
 
 	ply = 0;
 
-	hist_add.move = 0;
-	hist_add.ep_flag = 0;
-	hist_add.castle_flags = (u8) 0x1111;
-
-	hist[ply] = hist_add;
-
 	printf("\n");
 
 	const u8 SIDE_TO_MOVE = COLOR;
 
-	if(strcmp(arg1, "perft") == 0)
+	if (strcmp(arg1, "perft") == 0)
 		startPerft(SIDE_TO_MOVE, depth);
-	else if(strcmp(arg1, "divide") == 0)
+	else if (strcmp(arg1, "divide") == 0)
 		divide(depth, SIDE_TO_MOVE);
 
 	return 0;
 }
 
-void startPerft(u8 side, u8 depth)  {
+void startPerft(u8 side, u8 depth) {
 
 	u8 i;
 	u64 nodes;
 
-	clock_t start1, end1;
+	clock_t start, end;
 	double cpu_time_used;
 	double nps;
 
@@ -332,18 +365,19 @@ void startPerft(u8 side, u8 depth)  {
 
 		hist[ply] = defaultHist;
 
-		start1 = clock();
+		start = clock();
 
 		nodes = perft(i, side);
 
-		end1 = clock();
+		end = clock();
 
-		cpu_time_used = ((double) (end1 - start1)) / CLOCKS_PER_SEC;
-		nps = (double)(nodes / (cpu_time_used * 1000000));
+		cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
+		nps = (double) (nodes / (cpu_time_used * 1000000));
 		printf("Depth(%d)=   ", i);
 		printf(
 				"%10llu (%8.3f sec), color - %s, captures - %8llu, en - %6llu, cas - %6llu, checks - %8llu, %7.3f MN/s\n",
-				nodes, cpu_time_used, ((side == 0) ? "WHITE" : "BLACK"), cap, en, cas, check, nps);
+				nodes, cpu_time_used, ((side == 0) ? "WHITE" : "BLACK"), cap,
+				en, cas, check, nps);
 	}
 }
 

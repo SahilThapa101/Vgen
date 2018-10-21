@@ -18,34 +18,38 @@ u64 perft(u8 depth, u8 color) {
 		return 1;
 	}
 
+	ply = ply + 1;
+	moveStack[ply].epFlag = moveStack[ply - 1].epFlag;
+	moveStack[ply].epSquare = moveStack[ply - 1].epSquare;
+	moveStack[ply].castleFlags  =  moveStack[ply - 1].castleFlags;
+
 	n_moves = gen_moves(move_list, sideToMove);
 
 	for (i = 0; i < n_moves; i++) {
 
-		//		ply++;
-
-//		u32 move = move_list[i];
-//		hist_add.move = move;
-//		hist_add.ep_sq = hist[ply - 1].ep_sq;
-//		hist_add.ep_flag = hist[ply - 1].ep_flag;
-//		hist_add.castle_flags = hist[ply - 1].castle_flags;
-//		hist[ply] = hist_add;
-//		hist[ply] = defaultHist;
-
 		make_move(move_list[i]);
 
-		if (is_sq_attacked(bit_scan_forward(piece_bb[sideToMove][KING]), sideToMove)) {
+		if (is_sq_attacked(bit_scan_forward(piece_bb[sideToMove][KING]),
+				sideToMove)) {
 			// illegal move
+			if(move_type(move_list[i]) == 4) {
+				cas--;
+			}
+			if(move_type(move_list[i]) == 1) {
+				cap--;
+			}
+			if(move_type(move_list[i]) == 3) {
+				en--;
+			}
+
 		} else {
 			nodes += perft(depth - 1, (sideToMove ^ 1));
 		}
 
 		unmake_move(move_list[i]);
-
-		//		ply--;
-
 	}
 
+	ply = ply - 1;
 
 	return nodes;
 }

@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <time.h>
 
 #include "utility.h"
 #include "nonslidingmoves.h"
@@ -93,7 +94,7 @@ int bit_scan_forward(u64 board) {
 
 /* function to check if a square is attacked */
 
-int is_sq_attacked(u8 sq, u8 color) {
+bool is_sq_attacked(u8 sq, u8 color) {
 
 	u64 attacks;
 
@@ -102,35 +103,35 @@ int is_sq_attacked(u8 sq, u8 color) {
 	attacks = get_king_attacks(sq);
 
 	if (attacks & piece_bb[color ^ 1][KING])
-		return 1;
+		return true;
 
 	/* check if a queen is attacking a sq */
 
 	attacks = Qmagic(sq, occupied);
 
 	if (attacks & piece_bb[color ^ 1][QUEEN])
-		return 1;
+		return true;
 
 	/* check if a bishop is attacking a square */
 
 	attacks = Bmagic(sq, occupied);
 
 	if (attacks & piece_bb[color ^ 1][BISHOPS])
-		return 1;
+		return true;
 
 	/* check if a knight is attacking a square */
 
 	attacks = get_knight_attacks(sq);
 
 	if (attacks & piece_bb[color ^ 1][KNIGHTS])
-		return 1;
+		return true;
 
 	/* check if a rook is attacking a square */
 
 	attacks = Rmagic(sq, occupied);
 
 	if (attacks & piece_bb[color ^ 1][ROOKS])
-		return 1;
+		return true;
 
 	/* check if a pawn is attacking a square */
 
@@ -142,9 +143,9 @@ int is_sq_attacked(u8 sq, u8 color) {
 				| ((index_bb[sq] >> 9) & NOT_H_FILE);
 
 	if (attacks & piece_bb[color ^ 1][PAWNS])
-		return 1;
+		return true;
 
-	return 0;
+	return false;
 }
 
 u64 returnBB(int sq) {
@@ -583,18 +584,18 @@ int divide(u8 depth, u8 color) {
 	u32 noOfMoves = gen_moves(move_list, sideToMove);
 	u8 count = 0;
 
+	clock_t start, end;
+	double cpu_time_used;
+	double nps;
+
 	for (u8 i = 0; i < noOfMoves; i++) {
 
-		//ply=ply+1;
+		start = clock();
 
 		make_move(move_list[i]);
 		piece = piece_type(move_list[i]);
 		moveType = move_type(move_list[i]);
 		nodes = 0;
-
-		if(moveType == 3) {
-			print_bb(piece_bb[0][PIECES] | piece_bb[1][PIECES]);
-		}
 
 		if (is_sq_attacked(bit_scan_forward(piece_bb[sideToMove][KING]), sideToMove)) {
 			// King is in check
@@ -610,13 +611,17 @@ int divide(u8 depth, u8 color) {
 			else
 				nodes = perft(depth - 1, WHITE);
 
+			end  = clock();
+
+			cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
+			nps = (double)(nodes / (cpu_time_used * 1000000));
+
 			total_nodes = total_nodes + nodes;
-			printf("%llu, Move type  - %d\n", nodes, moveType);
+
+			printf("%llu, Move type  - %d, nps  - %7.3f MN/s\n", nodes, moveType,  nps);
 		}
 
 		unmake_move(move_list[i]);
-
-		//ply = ply - 1;
 	}
 
 	printf("Total nodes -> %llu\n", total_nodes);

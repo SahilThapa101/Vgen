@@ -28,10 +28,6 @@ u8 color;
 
 u64 quiet, cap, en, cas, check;
 
-u8 epFlag;
-u64 epSquare;
-
-
 /* pieceBB is an array containing bitboards for all pieces */
 
 u64 piece_bb[2][7]; /* color * (piece_type + pieces of that color) = 2 * 7 = 14 */
@@ -46,11 +42,36 @@ u64 index_bb[INDEX_BB_SIZE];
 #define MAX_PLY 1024
 u32 ply;
 
+struct History {
+
+	// current state
+	u8 epFlag;
+	u64 epSquare;
+	u8 castleFlags;
+
+	//prev state
+	u8 prevCastleFlags;
+} moveStack[MAX_PLY];
+
+u8 rookCastleFlagMask[64];
+
+#define CastleFlagWhiteKing 2
+#define CastleFlagWhiteQueen 1
+#define CastleFlagBlackKing 8
+#define CastleFlagBlackQueen 4
+
+#define WHITE_CASTLE_QUEEN_SIDE 0
+#define WHITE_CASTLE_KING_SIDE 1
+#define BLACK_CASTLE_QUEEN_SIDE 2
+#define BLACK_CASTLE_KING_SIDE 3
+
 struct hist {
 	u64 move;
+
 	u64 ep_sq;
 	u8 castle_flags;
 	u8 ep_flag;
+
 } hist[MAX_PLY], hist_add;
 
 /********************************/
