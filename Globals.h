@@ -16,6 +16,17 @@ typedef unsigned int u16;
 typedef unsigned long int u32;
 typedef unsigned long long int u64;
 
+#define BYTE_TO_BINARY_PATTERN "%c%c%c%c%c%c%c%c"
+#define BYTE_TO_BINARY(byte)  \
+		(byte & 0x80 ? '1' : '0'), \
+		(byte & 0x40 ? '1' : '0'), \
+		(byte & 0x20 ? '1' : '0'), \
+		(byte & 0x10 ? '1' : '0'), \
+		(byte & 0x08 ? '1' : '0'), \
+		(byte & 0x04 ? '1' : '0'), \
+		(byte & 0x02 ? '1' : '0'), \
+		(byte & 0x01 ? '1' : '0')
+
 #define C64(constantU64) constantU64
 
 #define MAX_MOVES 256
@@ -24,13 +35,20 @@ typedef unsigned long long int u64;
 #define WHITE 0
 #define BLACK 1
 
+#define MOVE_PROMOTION 5
+
+#define PROMOTE_TO_QUEEN 0
+#define PROMOTE_TO_ROOK 1
+#define PROMOTE_TO_BISHOP 2
+#define PROMOTE_TO_KNIGHT 3
+
 u8 color;
 
-u64 quiet, cap, en, cas, check;
+u64 quiet, prevCap, cap, prevEp, ep, prevCas, cas, check, prom;
 
 /* pieceBB is an array containing bitboards for all pieces */
 
-u64 piece_bb[2][7]; /* color * (piece_type + pieces of that color) = 2 * 7 = 14 */
+u64 pieceBB[2][7]; /* color * (piece_type + pieces of that color) = 2 * 7 = 14 */
 
 /* array size for indexBB array */
 #define INDEX_BB_SIZE 64
@@ -108,7 +126,9 @@ u64 occupied, empty;
 #define RANK_5 0x000000FF00000000U
 
 #define RANK_2 0x000000000000FF00U
+#define NOT_RANK_2 0xFFFFFFFFFFFF00FFU
 #define RANK_7 0x00FF000000000000U
+#define NOT_RANK_7 0xFF00FFFFFFFFFFFFU
 
 #define WQ_SIDE_SQS 0x000000000000000EU
 #define WK_SIDE_SQS 0x0000000000000060U

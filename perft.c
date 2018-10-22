@@ -23,13 +23,15 @@ u64 perft(u8 depth, u8 color) {
 	moveStack[ply].epSquare = moveStack[ply - 1].epSquare;
 	moveStack[ply].castleFlags  =  moveStack[ply - 1].castleFlags;
 
+//	printf("%x, ", moveStack[ply].castleFlags);
+
 	n_moves = gen_moves(move_list, sideToMove);
 
 	for (i = 0; i < n_moves; i++) {
 
 		make_move(move_list[i]);
 
-		if (is_sq_attacked(bit_scan_forward(piece_bb[sideToMove][KING]),
+		if (is_sq_attacked(bit_scan_forward(pieceBB[sideToMove][KING]),
 				sideToMove)) {
 			// illegal move
 			if(move_type(move_list[i]) == 4) {
@@ -39,9 +41,11 @@ u64 perft(u8 depth, u8 color) {
 				cap--;
 			}
 			if(move_type(move_list[i]) == 3) {
-				en--;
+				ep--;
 			}
-
+			if(move_type(move_list[i]) == 5) {
+				prom--;
+			}
 		} else {
 			nodes += perft(depth - 1, (sideToMove ^ 1));
 		}

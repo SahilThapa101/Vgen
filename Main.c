@@ -74,21 +74,21 @@ void readFEN(char* FEN, int len) {
 
 void clearAllBitBoards() {
 
-	piece_bb[WHITE][KING] &= 0;
-	piece_bb[WHITE][QUEEN] &= 0;
-	piece_bb[WHITE][BISHOPS] &= 0;
-	piece_bb[WHITE][KNIGHTS] &= 0;
-	piece_bb[WHITE][ROOKS] &= 0;
-	piece_bb[WHITE][PAWNS] &= 0;
-	piece_bb[WHITE][PIECES] &= 0;
+	pieceBB[WHITE][KING] &= 0;
+	pieceBB[WHITE][QUEEN] &= 0;
+	pieceBB[WHITE][BISHOPS] &= 0;
+	pieceBB[WHITE][KNIGHTS] &= 0;
+	pieceBB[WHITE][ROOKS] &= 0;
+	pieceBB[WHITE][PAWNS] &= 0;
+	pieceBB[WHITE][PIECES] &= 0;
 
-	piece_bb[BLACK][KING] &= 0;
-	piece_bb[BLACK][QUEEN] &= 0;
-	piece_bb[BLACK][BISHOPS] &= 0;
-	piece_bb[BLACK][KNIGHTS] &= 0;
-	piece_bb[BLACK][ROOKS] &= 0;
-	piece_bb[BLACK][PAWNS] &= 0;
-	piece_bb[BLACK][PIECES] &= 0;
+	pieceBB[BLACK][KING] &= 0;
+	pieceBB[BLACK][QUEEN] &= 0;
+	pieceBB[BLACK][BISHOPS] &= 0;
+	pieceBB[BLACK][KNIGHTS] &= 0;
+	pieceBB[BLACK][ROOKS] &= 0;
+	pieceBB[BLACK][PAWNS] &= 0;
+	pieceBB[BLACK][PIECES] &= 0;
 
 //	print_bb(piece_bb[BLACK][KING]);
 }
@@ -180,64 +180,64 @@ void splitTheFEN() {
 
 			//Black side
 			case 'k':
-				piece_bb[BLACK][KING] |= returnBB(pos);
+				pieceBB[BLACK][KING] |= returnBB(pos);
 				pos--;
 				//		printf("%s\n", "White King");
 				break;
 			case 'q':
-				piece_bb[BLACK][QUEEN] |= returnBB(pos);
+				pieceBB[BLACK][QUEEN] |= returnBB(pos);
 				pos--;
 				//		printf("%s\n", "White Queen");
 				break;
 			case 'b':
-				piece_bb[BLACK][BISHOPS] |= returnBB(pos);
+				pieceBB[BLACK][BISHOPS] |= returnBB(pos);
 				pos--;
 				//		printf("%s\n", "White Bishop");
 				break;
 			case 'n':
-				piece_bb[BLACK][KNIGHTS] |= returnBB(pos);
+				pieceBB[BLACK][KNIGHTS] |= returnBB(pos);
 				pos--;
 				//		printf("%s\n", "White Knight");
 				break;
 			case 'r':
-				piece_bb[BLACK][ROOKS] |= returnBB(pos);
+				pieceBB[BLACK][ROOKS] |= returnBB(pos);
 				pos--;
 				//		printf("%s\n", "White Rook");
 				break;
 			case 'p':
-				piece_bb[BLACK][PAWNS] |= returnBB(pos);
+				pieceBB[BLACK][PAWNS] |= returnBB(pos);
 				pos--;
 				//		printf("%s\n", "White Pawns");
 				break;
 
 				//White side
 			case 'K':
-				piece_bb[WHITE][KING] |= returnBB(pos);
+				pieceBB[WHITE][KING] |= returnBB(pos);
 				pos--;
 				//		printf("%s\n", "Black King");
 				break;
 			case 'Q':
-				piece_bb[WHITE][QUEEN] |= returnBB(pos);
+				pieceBB[WHITE][QUEEN] |= returnBB(pos);
 				pos--;
 				//		printf("%s\n", "Black Queen");
 				break;
 			case 'B':
-				piece_bb[WHITE][BISHOPS] |= returnBB(pos);
+				pieceBB[WHITE][BISHOPS] |= returnBB(pos);
 				pos--;
 				//		printf("%s\n", "Black Bishop");
 				break;
 			case 'N':
-				piece_bb[WHITE][KNIGHTS] |= returnBB(pos);
+				pieceBB[WHITE][KNIGHTS] |= returnBB(pos);
 				pos--;
 				//		printf("%s\n", "Black Knight");
 				break;
 			case 'R':
-				piece_bb[WHITE][ROOKS] |= returnBB(pos);
+				pieceBB[WHITE][ROOKS] |= returnBB(pos);
 				pos--;
 				//		printf("%s\n", "Black Rook");
 				break;
 			case 'P':
-				piece_bb[WHITE][PAWNS] |= returnBB(pos);
+				pieceBB[WHITE][PAWNS] |= returnBB(pos);
 				pos--;
 				//		printf("%s\n", "Black Pawns");
 				break;
@@ -275,18 +275,18 @@ void splitTheFEN() {
 		}
 	}
 
-	piece_bb[WHITE][PIECES] = piece_bb[WHITE][KING] | piece_bb[WHITE][QUEEN]
-			| piece_bb[WHITE][BISHOPS] | piece_bb[WHITE][KNIGHTS]
-			| piece_bb[WHITE][ROOKS] | piece_bb[WHITE][PAWNS];
-	piece_bb[BLACK][PIECES] = piece_bb[BLACK][KING] | piece_bb[BLACK][QUEEN]
-			| piece_bb[BLACK][BISHOPS] | piece_bb[BLACK][KNIGHTS]
-			| piece_bb[BLACK][ROOKS] | piece_bb[BLACK][PAWNS];
-	occupied = piece_bb[BLACK][KING] | piece_bb[BLACK][QUEEN]
-			| piece_bb[BLACK][BISHOPS] | piece_bb[BLACK][KNIGHTS]
-			| piece_bb[BLACK][ROOKS] | piece_bb[BLACK][PAWNS]
-			| piece_bb[WHITE][KING] | piece_bb[WHITE][QUEEN]
-			| piece_bb[WHITE][BISHOPS] | piece_bb[WHITE][KNIGHTS]
-			| piece_bb[WHITE][ROOKS] | piece_bb[WHITE][PAWNS];
+	pieceBB[WHITE][PIECES] = pieceBB[WHITE][KING] | pieceBB[WHITE][QUEEN]
+			| pieceBB[WHITE][BISHOPS] | pieceBB[WHITE][KNIGHTS]
+			| pieceBB[WHITE][ROOKS] | pieceBB[WHITE][PAWNS];
+	pieceBB[BLACK][PIECES] = pieceBB[BLACK][KING] | pieceBB[BLACK][QUEEN]
+			| pieceBB[BLACK][BISHOPS] | pieceBB[BLACK][KNIGHTS]
+			| pieceBB[BLACK][ROOKS] | pieceBB[BLACK][PAWNS];
+	occupied = pieceBB[BLACK][KING] | pieceBB[BLACK][QUEEN]
+			| pieceBB[BLACK][BISHOPS] | pieceBB[BLACK][KNIGHTS]
+			| pieceBB[BLACK][ROOKS] | pieceBB[BLACK][PAWNS]
+			| pieceBB[WHITE][KING] | pieceBB[WHITE][QUEEN]
+			| pieceBB[WHITE][BISHOPS] | pieceBB[WHITE][KNIGHTS]
+			| pieceBB[WHITE][ROOKS] | pieceBB[WHITE][PAWNS];
 
 	empty = ~occupied;
 
@@ -351,15 +351,20 @@ void startPerft(u8 side, u8 depth) {
 	double cpu_time_used;
 	double nps;
 
+	prevCap = 0;
+	prevEp = 0;
+	prevCas = 0;
+
 	for (int i = 1; i <= depth; i++) {
 
 		nodes = 0;
 		quiet = 0;
 		cap = 0;
-		en = 0;
+		ep = 0;
 		cas = 0;
 		check = 0;
 		ply = 0;
+		prom = 0;
 
 		struct hist defaultHist = { 0, 0, 0, 0 };
 
@@ -371,13 +376,21 @@ void startPerft(u8 side, u8 depth) {
 
 		end = clock();
 
+		cap = cap - prevCap;
+		ep = ep - prevEp;
+		cas = cas - prevCas;
+
 		cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
 		nps = (double) (nodes / (cpu_time_used * 1000000));
 		printf("Depth(%d)=   ", i);
 		printf(
-				"%10llu (%8.3f sec), color - %s, captures - %8llu, en - %6llu, cas - %6llu, checks - %8llu, %7.3f MN/s\n",
+				"%10llu (%8.3f sec), color - %s, captures - %8llu, en - %6llu, cas - %6llu, prom - %8llu, %7.3f MN/s\n",
 				nodes, cpu_time_used, ((side == 0) ? "WHITE" : "BLACK"), cap,
-				en, cas, check, nps);
+				ep, cas, prom, nps);
+
+		prevCap = cap;
+		prevEp = ep;
+		prevCas = cas;
 	}
 }
 

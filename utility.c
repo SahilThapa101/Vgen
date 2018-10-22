@@ -39,30 +39,30 @@ void print_board(u64 board) {
 			if ((((u64) 1) << ((row * 8 + col)) & board)
 					== (u64) 1 << (row * 8 + col)) {
 
-				if ((u64) 1 << (row * 8 + col) & piece_bb[WHITE][KING])
+				if ((u64) 1 << (row * 8 + col) & pieceBB[WHITE][KING])
 					putchar('K');
-				if ((u64) 1 << (row * 8 + col) & piece_bb[WHITE][QUEEN])
+				if ((u64) 1 << (row * 8 + col) & pieceBB[WHITE][QUEEN])
 					putchar('Q');
-				if ((u64) 1 << (row * 8 + col) & piece_bb[WHITE][BISHOPS])
+				if ((u64) 1 << (row * 8 + col) & pieceBB[WHITE][BISHOPS])
 					putchar('B');
-				if ((u64) 1 << (row * 8 + col) & piece_bb[WHITE][KNIGHTS])
+				if ((u64) 1 << (row * 8 + col) & pieceBB[WHITE][KNIGHTS])
 					putchar('N');
-				if ((u64) 1 << (row * 8 + col) & piece_bb[WHITE][ROOKS])
+				if ((u64) 1 << (row * 8 + col) & pieceBB[WHITE][ROOKS])
 					putchar('R');
-				if ((u64) 1 << (row * 8 + col) & piece_bb[WHITE][PAWNS])
+				if ((u64) 1 << (row * 8 + col) & pieceBB[WHITE][PAWNS])
 					putchar('P');
 
-				if ((u64) 1 << (row * 8 + col) & piece_bb[BLACK][KING])
+				if ((u64) 1 << (row * 8 + col) & pieceBB[BLACK][KING])
 					putchar('k');
-				if ((u64) 1 << (row * 8 + col) & piece_bb[BLACK][QUEEN])
+				if ((u64) 1 << (row * 8 + col) & pieceBB[BLACK][QUEEN])
 					putchar('q');
-				if ((u64) 1 << (row * 8 + col) & piece_bb[BLACK][BISHOPS])
+				if ((u64) 1 << (row * 8 + col) & pieceBB[BLACK][BISHOPS])
 					putchar('b');
-				if ((u64) 1 << (row * 8 + col) & piece_bb[BLACK][KNIGHTS])
+				if ((u64) 1 << (row * 8 + col) & pieceBB[BLACK][KNIGHTS])
 					putchar('n');
-				if ((u64) 1 << (row * 8 + col) & piece_bb[BLACK][ROOKS])
+				if ((u64) 1 << (row * 8 + col) & pieceBB[BLACK][ROOKS])
 					putchar('r');
-				if ((u64) 1 << (row * 8 + col) & piece_bb[BLACK][PAWNS])
+				if ((u64) 1 << (row * 8 + col) & pieceBB[BLACK][PAWNS])
 					putchar('p');
 			} else
 				putchar('.');
@@ -102,35 +102,35 @@ bool is_sq_attacked(u8 sq, u8 color) {
 
 	attacks = get_king_attacks(sq);
 
-	if (attacks & piece_bb[color ^ 1][KING])
+	if (attacks & pieceBB[color ^ 1][KING])
 		return true;
 
 	/* check if a queen is attacking a sq */
 
 	attacks = Qmagic(sq, occupied);
 
-	if (attacks & piece_bb[color ^ 1][QUEEN])
+	if (attacks & pieceBB[color ^ 1][QUEEN])
 		return true;
 
 	/* check if a bishop is attacking a square */
 
 	attacks = Bmagic(sq, occupied);
 
-	if (attacks & piece_bb[color ^ 1][BISHOPS])
+	if (attacks & pieceBB[color ^ 1][BISHOPS])
 		return true;
 
 	/* check if a knight is attacking a square */
 
 	attacks = get_knight_attacks(sq);
 
-	if (attacks & piece_bb[color ^ 1][KNIGHTS])
+	if (attacks & pieceBB[color ^ 1][KNIGHTS])
 		return true;
 
 	/* check if a rook is attacking a square */
 
 	attacks = Rmagic(sq, occupied);
 
-	if (attacks & piece_bb[color ^ 1][ROOKS])
+	if (attacks & pieceBB[color ^ 1][ROOKS])
 		return true;
 
 	/* check if a pawn is attacking a square */
@@ -142,7 +142,7 @@ bool is_sq_attacked(u8 sq, u8 color) {
 		attacks = ((index_bb[sq] >> 7) & NOT_A_FILE)
 				| ((index_bb[sq] >> 9) & NOT_H_FILE);
 
-	if (attacks & piece_bb[color ^ 1][PAWNS])
+	if (attacks & pieceBB[color ^ 1][PAWNS])
 		return true;
 
 	return false;
@@ -597,7 +597,7 @@ int divide(u8 depth, u8 color) {
 		moveType = move_type(move_list[i]);
 		nodes = 0;
 
-		if (is_sq_attacked(bit_scan_forward(piece_bb[sideToMove][KING]), sideToMove)) {
+		if (is_sq_attacked(bit_scan_forward(pieceBB[sideToMove][KING]), sideToMove)) {
 			// King is in check
 		} else {
 			count++;
@@ -618,7 +618,7 @@ int divide(u8 depth, u8 color) {
 
 			total_nodes = total_nodes + nodes;
 
-			printf("%llu, Move type  - %d, nps  - %7.3f MN/s\n", nodes, moveType,  nps);
+			printf("%llu, Move type  - %d, castle flags -" BYTE_TO_BINARY_PATTERN", nps  - %7.3f MN/s\n", nodes, moveType, BYTE_TO_BINARY(moveStack[ply].castleFlags),  nps);
 		}
 
 		unmake_move(move_list[i]);
