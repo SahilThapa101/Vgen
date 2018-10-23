@@ -35,7 +35,7 @@ typedef unsigned long long int u64;
 #define WHITE 0
 #define BLACK 1
 
-#define MOVE_PROMOTION 5
+#define MOVE_TYPE_PROMOTION 5
 
 #define PROMOTE_TO_QUEEN 0
 #define PROMOTE_TO_ROOK 1

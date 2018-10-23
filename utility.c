@@ -581,7 +581,7 @@ int divide(u8 depth, u8 color) {
 	u64 nodes;
 	u8 sideToMove = color;
 
-	u32 noOfMoves = gen_moves(move_list, sideToMove);
+	u32 noOfMoves = genMoves(move_list, sideToMove);
 	u8 count = 0;
 
 	clock_t start, end;

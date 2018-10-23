@@ -170,7 +170,7 @@ void make_move(u32 move) {
 		} else {
 
 			moveStack[ply].castleFlags &= ~(CastleFlagBlackKing
-							| CastleFlagBlackQueen);
+					| CastleFlagBlackQueen);
 
 			if (castleDirection == BLACK_CASTLE_QUEEN_SIDE) {
 
@@ -207,11 +207,12 @@ void make_move(u32 move) {
 
 		break;
 
-	case MOVE_PROMOTION:
+	case MOVE_TYPE_PROMOTION:
 
 		prom++;
 
 		switch (prom_type(move)) {
+
 		case PROMOTE_TO_QUEEN:
 			pieceBB[color][PAWNS] ^= from_bb;
 			pieceBB[color][QUEEN] ^= to_bb;
@@ -231,6 +232,7 @@ void make_move(u32 move) {
 			}
 
 			break;
+
 		case PROMOTE_TO_ROOK:
 
 			pieceBB[color][PAWNS] ^= from_bb;
@@ -250,6 +252,7 @@ void make_move(u32 move) {
 			}
 
 			break;
+
 		case PROMOTE_TO_KNIGHT:
 			pieceBB[color][PAWNS] ^= from_bb;
 			pieceBB[color][KNIGHTS] ^= to_bb;
@@ -268,6 +271,7 @@ void make_move(u32 move) {
 			}
 
 			break;
+
 		case PROMOTE_TO_BISHOP:
 			pieceBB[color][PAWNS] ^= from_bb;
 			pieceBB[color][BISHOPS] ^= to_bb;
@@ -286,9 +290,15 @@ void make_move(u32 move) {
 			}
 			break;
 		}
+
+		if(c_piece == ROOKS) {
+			moveStack[ply].prevCastleFlags = moveStack[ply].castleFlags;
+			moveStack[ply].castleFlags &= rookCastleFlagMask[toSq];
+		}
+
 		break;
-	default:
-		break;
+		default:
+			break;
 	}
 }
 
@@ -306,19 +316,21 @@ void unmake_move(u32 move) {
 	c_piece = c_piece_type(move);
 	color = color_type(move);
 
+	moveStack[ply].castleFlags = moveStack[ply].prevCastleFlags;
+
 	switch (move_type(move)) {
 
 	case 0:
+
 		pieceBB[color][piece] ^= from_to_bb;
 		pieceBB[color][PIECES] ^= from_to_bb;
 
 		occupied ^= from_to_bb;
 		empty ^= from_to_bb;
 
-		moveStack[ply].castleFlags = moveStack[ply].prevCastleFlags;
-
 		break;
 	case 1:
+
 		pieceBB[color][piece] ^= from_to_bb;
 		pieceBB[color][PIECES] ^= from_to_bb;
 
@@ -328,10 +340,9 @@ void unmake_move(u32 move) {
 		occupied ^= from_bb;
 		empty ^= from_bb;
 
-		moveStack[ply].castleFlags = moveStack[ply].prevCastleFlags;
-
 		break;
 	case 2:
+
 		pieceBB[color][piece] ^= from_to_bb;
 		pieceBB[color][PIECES] ^= from_to_bb;
 
@@ -423,22 +434,12 @@ void unmake_move(u32 move) {
 		occupied = pieceBB[WHITE][PIECES] | pieceBB[BLACK][PIECES];
 		empty = ~occupied;
 
-		moveStack[ply].castleFlags = moveStack[ply].prevCastleFlags;
-
 		break;
-	case MOVE_PROMOTION:
+	case MOVE_TYPE_PROMOTION:
 
 		switch (prom_type(move)) {
 
 		case PROMOTE_TO_QUEEN:
-			pieceBB[color][piece] ^= from_to_bb;
-			pieceBB[color][PIECES] ^= from_to_bb;
-
-			pieceBB[color ^ 1][c_piece] ^= to_bb;
-			pieceBB[color ^ 1][PIECES] ^= to_bb;
-
-			occupied ^= from_bb;
-			empty ^= from_bb;
 
 			pieceBB[color][PAWNS] ^= from_bb;
 			pieceBB[color][QUEEN] ^= to_bb;
@@ -511,6 +512,7 @@ void unmake_move(u32 move) {
 			}
 			break;
 		}
+
 		break;
 	}
 }

@@ -25,9 +25,11 @@ u64 perft(u8 depth, u8 color) {
 
 //	printf("%x, ", moveStack[ply].castleFlags);
 
-	n_moves = gen_moves(move_list, sideToMove);
+	n_moves = genMoves(move_list, sideToMove);
 
 	for (i = 0; i < n_moves; i++) {
+
+
 
 		make_move(move_list[i]);
 
@@ -47,6 +49,7 @@ u64 perft(u8 depth, u8 color) {
 				prom--;
 			}
 		} else {
+
 			nodes += perft(depth - 1, (sideToMove ^ 1));
 		}
 
