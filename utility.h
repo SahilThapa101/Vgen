@@ -10,12 +10,12 @@
 #include "globals.h"
 
 void print_bb(u64 board);
-int bit_scan_forward(u64 board);
+int bitScanForward(u64 board);
 
-bool is_sq_attacked(u8 sq, const u8 color);
+bool isSqAttacked(u8 sq, const u8 color);
 
 int divide(u8 depth, u8 color);
 
-u64 returnBB(int sq);
+u64 getBitboardFromSquare(int sq);
 
 #endif

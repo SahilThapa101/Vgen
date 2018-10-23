@@ -86,7 +86,7 @@ const int index64[64] = { 0, 47, 1, 56, 48, 27, 2, 60, 57, 49, 41, 37, 28, 16,
 		46, 55, 26, 59, 40, 36, 15, 53, 34, 51, 20, 43, 31, 22, 10, 45, 25, 39,
 		14, 33, 19, 30, 9, 24, 13, 18, 8, 12, 7, 6, 5, 63 };
 
-int bit_scan_forward(u64 board) {
+int bitScanForward(u64 board) {
 	const u64 debruijn64 = 285870213051386505U;
 
 	return index64[((board ^ (board - 1)) * debruijn64) >> 58];
@@ -94,7 +94,7 @@ int bit_scan_forward(u64 board) {
 
 /* function to check if a square is attacked */
 
-bool is_sq_attacked(u8 sq, u8 color) {
+bool isSqAttacked(u8 sq, u8 color) {
 
 	u64 attacks;
 
@@ -148,7 +148,7 @@ bool is_sq_attacked(u8 sq, u8 color) {
 	return false;
 }
 
-u64 returnBB(int sq) {
+u64 getBitboardFromSquare(int sq) {
 	switch (sq) {
 	case 0:
 		return 0x0000000000000001U;
@@ -424,147 +424,147 @@ char* algebricPos(u8 sq) {
 u64 bbFromAlgebricPos(char* posName) {
 
 	if (strcmp(posName, "a1") == 0) {
-		return returnBB(0);
+		return getBitboardFromSquare(0);
 	} else if (strcmp(posName, "b1") == 0) {
-		return returnBB(1);
+		return getBitboardFromSquare(1);
 	} else if (strcmp(posName, "c1") == 0) {
-		return returnBB(2);
+		return getBitboardFromSquare(2);
 	} else if (strcmp(posName, "d1") == 0) {
-		return returnBB(3);
+		return getBitboardFromSquare(3);
 	} else if (strcmp(posName, "e1") == 0) {
-		return returnBB(4);
+		return getBitboardFromSquare(4);
 	} else if (strcmp(posName, "f1") == 0) {
-		return returnBB(5);
+		return getBitboardFromSquare(5);
 	} else if (strcmp(posName, "g1") == 0) {
-		return returnBB(6);
+		return getBitboardFromSquare(6);
 	} else if (strcmp(posName, "h1") == 0) {
-		return returnBB(7);
+		return getBitboardFromSquare(7);
 	}
 
 	if (strcmp(posName, "a2") == 0) {
-		return returnBB(8);
+		return getBitboardFromSquare(8);
 	} else if (strcmp(posName, "b2") == 0) {
-		return returnBB(9);
+		return getBitboardFromSquare(9);
 	} else if (strcmp(posName, "c2") == 0) {
-		return returnBB(10);
+		return getBitboardFromSquare(10);
 	} else if (strcmp(posName, "d2") == 0) {
-		return returnBB(11);
+		return getBitboardFromSquare(11);
 	} else if (strcmp(posName, "e2") == 0) {
-		return returnBB(12);
+		return getBitboardFromSquare(12);
 	} else if (strcmp(posName, "f2") == 0) {
-		return returnBB(13);
+		return getBitboardFromSquare(13);
 	} else if (strcmp(posName, "g2") == 0) {
-		return returnBB(14);
+		return getBitboardFromSquare(14);
 	} else if (strcmp(posName, "h2") == 0) {
-		return returnBB(15);
+		return getBitboardFromSquare(15);
 	}
 
 	if (strcmp(posName, "a3") == 0) {
-		return returnBB(16);
+		return getBitboardFromSquare(16);
 	} else if (strcmp(posName, "b3") == 0) {
-		return returnBB(17);
+		return getBitboardFromSquare(17);
 	} else if (strcmp(posName, "c3") == 0) {
-		return returnBB(18);
+		return getBitboardFromSquare(18);
 	} else if (strcmp(posName, "d3") == 0) {
-		return returnBB(19);
+		return getBitboardFromSquare(19);
 	} else if (strcmp(posName, "e3") == 0) {
-		return returnBB(20);
+		return getBitboardFromSquare(20);
 	} else if (strcmp(posName, "f3") == 0) {
-		return returnBB(21);
+		return getBitboardFromSquare(21);
 	} else if (strcmp(posName, "g3") == 0) {
-		return returnBB(22);
+		return getBitboardFromSquare(22);
 	} else if (strcmp(posName, "h3") == 0) {
-		return returnBB(23);
+		return getBitboardFromSquare(23);
 	}
 
 	if (strcmp(posName, "a4") == 0) {
-		return returnBB(24);
+		return getBitboardFromSquare(24);
 	} else if (strcmp(posName, "b4") == 0) {
-		return returnBB(25);
+		return getBitboardFromSquare(25);
 	} else if (strcmp(posName, "c4") == 0) {
-		return returnBB(26);
+		return getBitboardFromSquare(26);
 	} else if (strcmp(posName, "d4") == 0) {
-		return returnBB(27);
+		return getBitboardFromSquare(27);
 	} else if (strcmp(posName, "e4") == 0) {
-		return returnBB(28);
+		return getBitboardFromSquare(28);
 	} else if (strcmp(posName, "f4") == 0) {
-		return returnBB(29);
+		return getBitboardFromSquare(29);
 	} else if (strcmp(posName, "g4") == 0) {
-		return returnBB(30);
+		return getBitboardFromSquare(30);
 	} else if (strcmp(posName, "h4") == 0) {
-		return returnBB(31);
+		return getBitboardFromSquare(31);
 	}
 
 	if (strcmp(posName, "a5") == 0) {
-		return returnBB(32);
+		return getBitboardFromSquare(32);
 	} else if (strcmp(posName, "b5") == 0) {
-		return returnBB(33);
+		return getBitboardFromSquare(33);
 	} else if (strcmp(posName, "c5") == 0) {
-		return returnBB(34);
+		return getBitboardFromSquare(34);
 	} else if (strcmp(posName, "d5") == 0) {
-		return returnBB(35);
+		return getBitboardFromSquare(35);
 	} else if (strcmp(posName, "e5") == 0) {
-		return returnBB(36);
+		return getBitboardFromSquare(36);
 	} else if (strcmp(posName, "f5") == 0) {
-		return returnBB(37);
+		return getBitboardFromSquare(37);
 	} else if (strcmp(posName, "g5") == 0) {
-		return returnBB(38);
+		return getBitboardFromSquare(38);
 	} else if (strcmp(posName, "h5") == 0) {
-		return returnBB(39);
+		return getBitboardFromSquare(39);
 	}
 
 	if (strcmp(posName, "a6") == 0) {
-		return returnBB(40);
+		return getBitboardFromSquare(40);
 	} else if (strcmp(posName, "b6") == 0) {
-		return returnBB(41);
+		return getBitboardFromSquare(41);
 	} else if (strcmp(posName, "c6") == 0) {
-		return returnBB(42);
+		return getBitboardFromSquare(42);
 	} else if (strcmp(posName, "d6") == 0) {
-		return returnBB(43);
+		return getBitboardFromSquare(43);
 	} else if (strcmp(posName, "e6") == 0) {
-		return returnBB(44);
+		return getBitboardFromSquare(44);
 	} else if (strcmp(posName, "f6") == 0) {
-		return returnBB(45);
+		return getBitboardFromSquare(45);
 	} else if (strcmp(posName, "g6") == 0) {
-		return returnBB(46);
+		return getBitboardFromSquare(46);
 	} else if (strcmp(posName, "h6") == 0) {
-		return returnBB(47);
+		return getBitboardFromSquare(47);
 	}
 
 	if (strcmp(posName, "a7") == 0) {
-		return returnBB(48);
+		return getBitboardFromSquare(48);
 	} else if (strcmp(posName, "b7") == 0) {
-		return returnBB(49);
+		return getBitboardFromSquare(49);
 	} else if (strcmp(posName, "c7") == 0) {
-		return returnBB(50);
+		return getBitboardFromSquare(50);
 	} else if (strcmp(posName, "d7") == 0) {
-		return returnBB(51);
+		return getBitboardFromSquare(51);
 	} else if (strcmp(posName, "e7") == 0) {
-		return returnBB(52);
+		return getBitboardFromSquare(52);
 	} else if (strcmp(posName, "f7") == 0) {
-		return returnBB(53);
+		return getBitboardFromSquare(53);
 	} else if (strcmp(posName, "g7") == 0) {
-		return returnBB(54);
+		return getBitboardFromSquare(54);
 	} else if (strcmp(posName, "h7") == 0) {
-		return returnBB(55);
+		return getBitboardFromSquare(55);
 	}
 
 	if (strcmp(posName, "a8") == 0) {
-		return returnBB(56);
+		return getBitboardFromSquare(56);
 	} else if (strcmp(posName, "b8") == 0) {
-		return returnBB(57);
+		return getBitboardFromSquare(57);
 	} else if (strcmp(posName, "c8") == 0) {
-		return returnBB(58);
+		return getBitboardFromSquare(58);
 	} else if (strcmp(posName, "d8") == 0) {
-		return returnBB(59);
+		return getBitboardFromSquare(59);
 	} else if (strcmp(posName, "e8") == 0) {
-		return returnBB(60);
+		return getBitboardFromSquare(60);
 	} else if (strcmp(posName, "f8") == 0) {
-		return returnBB(61);
+		return getBitboardFromSquare(61);
 	} else if (strcmp(posName, "g8") == 0) {
-		return returnBB(62);
+		return getBitboardFromSquare(62);
 	} else if (strcmp(posName, "h8") == 0) {
-		return returnBB(63);
+		return getBitboardFromSquare(63);
 	}
 
 }
@@ -593,11 +593,11 @@ int divide(u8 depth, u8 color) {
 		start = clock();
 
 		make_move(move_list[i]);
-		piece = piece_type(move_list[i]);
+		piece = pieceType(move_list[i]);
 		moveType = move_type(move_list[i]);
 		nodes = 0;
 
-		if (is_sq_attacked(bit_scan_forward(pieceBB[sideToMove][KING]), sideToMove)) {
+		if (isSqAttacked(bitScanForward(pieceBB[sideToMove][KING]), sideToMove)) {
 			// King is in check
 		} else {
 			count++;

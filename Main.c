@@ -180,64 +180,64 @@ void splitTheFEN() {
 
 			//Black side
 			case 'k':
-				pieceBB[BLACK][KING] |= returnBB(pos);
+				pieceBB[BLACK][KING] |= getBitboardFromSquare(pos);
 				pos--;
 				//		printf("%s\n", "White King");
 				break;
 			case 'q':
-				pieceBB[BLACK][QUEEN] |= returnBB(pos);
+				pieceBB[BLACK][QUEEN] |= getBitboardFromSquare(pos);
 				pos--;
 				//		printf("%s\n", "White Queen");
 				break;
 			case 'b':
-				pieceBB[BLACK][BISHOPS] |= returnBB(pos);
+				pieceBB[BLACK][BISHOPS] |= getBitboardFromSquare(pos);
 				pos--;
 				//		printf("%s\n", "White Bishop");
 				break;
 			case 'n':
-				pieceBB[BLACK][KNIGHTS] |= returnBB(pos);
+				pieceBB[BLACK][KNIGHTS] |= getBitboardFromSquare(pos);
 				pos--;
 				//		printf("%s\n", "White Knight");
 				break;
 			case 'r':
-				pieceBB[BLACK][ROOKS] |= returnBB(pos);
+				pieceBB[BLACK][ROOKS] |= getBitboardFromSquare(pos);
 				pos--;
 				//		printf("%s\n", "White Rook");
 				break;
 			case 'p':
-				pieceBB[BLACK][PAWNS] |= returnBB(pos);
+				pieceBB[BLACK][PAWNS] |= getBitboardFromSquare(pos);
 				pos--;
 				//		printf("%s\n", "White Pawns");
 				break;
 
 				//White side
 			case 'K':
-				pieceBB[WHITE][KING] |= returnBB(pos);
+				pieceBB[WHITE][KING] |= getBitboardFromSquare(pos);
 				pos--;
 				//		printf("%s\n", "Black King");
 				break;
 			case 'Q':
-				pieceBB[WHITE][QUEEN] |= returnBB(pos);
+				pieceBB[WHITE][QUEEN] |= getBitboardFromSquare(pos);
 				pos--;
 				//		printf("%s\n", "Black Queen");
 				break;
 			case 'B':
-				pieceBB[WHITE][BISHOPS] |= returnBB(pos);
+				pieceBB[WHITE][BISHOPS] |= getBitboardFromSquare(pos);
 				pos--;
 				//		printf("%s\n", "Black Bishop");
 				break;
 			case 'N':
-				pieceBB[WHITE][KNIGHTS] |= returnBB(pos);
+				pieceBB[WHITE][KNIGHTS] |= getBitboardFromSquare(pos);
 				pos--;
 				//		printf("%s\n", "Black Knight");
 				break;
 			case 'R':
-				pieceBB[WHITE][ROOKS] |= returnBB(pos);
+				pieceBB[WHITE][ROOKS] |= getBitboardFromSquare(pos);
 				pos--;
 				//		printf("%s\n", "Black Rook");
 				break;
 			case 'P':
-				pieceBB[WHITE][PAWNS] |= returnBB(pos);
+				pieceBB[WHITE][PAWNS] |= getBitboardFromSquare(pos);
 				pos--;
 				//		printf("%s\n", "Black Pawns");
 				break;

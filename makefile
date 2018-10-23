@@ -28,4 +28,4 @@ perft.o:	perft.c
 	gcc -c perft.c
 
 clean:
-	rm *o Vengeance
+	rm *o *exe Vengeance

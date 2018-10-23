@@ -15,9 +15,9 @@ void make_move(u32 move) {
 
 	from_to_bb = from_bb ^ to_bb;
 
-	piece = piece_type(move);
-	c_piece = c_piece_type(move);
-	color = color_type(move);
+	piece = pieceType(move);
+	c_piece = cPieceType(move);
+	color = colorType(move);
 
 	moveStack[ply].epFlag = 0;
 
@@ -132,7 +132,7 @@ void make_move(u32 move) {
 	case 4:
 		cas++;
 
-		u8 castleDirection = castle_dir(move);
+		u8 castleDirection = castleDir(move);
 
 		moveStack[ply].prevCastleFlags = moveStack[ply].castleFlags;
 
@@ -211,7 +211,7 @@ void make_move(u32 move) {
 
 		prom++;
 
-		switch (prom_type(move)) {
+		switch (promType(move)) {
 
 		case PROMOTE_TO_QUEEN:
 			pieceBB[color][PAWNS] ^= from_bb;
@@ -305,16 +305,16 @@ void make_move(u32 move) {
 void unmake_move(u32 move) {
 	u64 from_bb, to_bb, from_to_bb, piece, c_piece, color;
 
-	u8 castleDirection = castle_dir(move);
+	u8 castleDirection = castleDir(move);
 
 	from_bb = index_bb[from_sq(move)];
 	to_bb = index_bb[to_sq(move)];
 
 	from_to_bb = from_bb ^ to_bb;
 
-	piece = piece_type(move);
-	c_piece = c_piece_type(move);
-	color = color_type(move);
+	piece = pieceType(move);
+	c_piece = cPieceType(move);
+	color = colorType(move);
 
 	moveStack[ply].castleFlags = moveStack[ply].prevCastleFlags;
 
@@ -437,7 +437,7 @@ void unmake_move(u32 move) {
 		break;
 	case MOVE_TYPE_PROMOTION:
 
-		switch (prom_type(move)) {
+		switch (promType(move)) {
 
 		case PROMOTE_TO_QUEEN:
 
