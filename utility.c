@@ -1,10 +1,14 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <time.h>
+#include <string.h>
 
 #include "utility.h"
 #include "nonslidingmoves.h"
 #include "magicmoves.h"
+#include "make_unmake.h"
+#include "movegen.h"
+#include "perft.h"
 
 void print_bb(u64 board) {
 
@@ -90,6 +94,21 @@ int bitScanForward(u64 board) {
 	const u64 debruijn64 = 285870213051386505U;
 
 	return index64[((board ^ (board - 1)) * debruijn64) >> 58];
+}
+
+// for population count
+const u64 k1 = C64(0x5555555555555555); /*  -1/3   */
+const u64 k2 = C64(0x3333333333333333); /*  -1/5   */
+const u64 k4 = C64(0x0f0f0f0f0f0f0f0f); /*  -1/17  */
+const u64 kf = C64(0x0101010101010101); /*  -1/255 */
+
+// population count
+int popCount (u64 x) {
+    x =  x       - ((x >> 1)  & k1); /* put count of each 2 bits into those 2 bits */
+    x = (x & k2) + ((x >> 2)  & k2); /* put count of each 4 bits into those 4 bits */
+    x = (x       +  (x >> 4)) & k4 ; /* put count of each 8 bits into those 8 bits */
+    x = (x * kf) >> 56; /* returns 8 most significant bits of x + (x<<8) + (x<<16) + (x<<24) + ...  */
+    return (int) x;
 }
 
 /* function to check if a square is attacked */

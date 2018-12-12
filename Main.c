@@ -17,8 +17,11 @@
 #include "init.h"
 #include "perft.h"
 #include "dynarray.h"
+#include "evaluate.h"
 
 u8 COLOR;
+
+void startPerft(u8 side, u8 depth);
 
 typedef void (*split_fn)(const char *, size_t, void *);
 
@@ -118,7 +121,7 @@ void splitTheFEN() {
 
 	char* checkCastleFlags = ((char*) (d_array->buffer[2]));
 
-	if (!strcmp(checkCastleFlags, "-") == 0) {
+	if (strcmp(checkCastleFlags, "-") != 0) {
 
 		int len = strlen(checkCastleFlags);
 		u8 flag = 0;
@@ -148,7 +151,7 @@ void splitTheFEN() {
 		moveStack[0].epFlag = 1;
 		moveStack[0].epSquare = bbFromAlgebricPos(checkEpSquare);
 	}
-
+ 
 	printf("Side to move : %s\n", COLOR == 0 ? "WHITE" : "BLACK");
 
 	for (int i = 0; i < d_array->count; i++) {
@@ -174,7 +177,8 @@ void splitTheFEN() {
 		reverse[reversePos] = '\0';
 
 		reversePos = 0;
-		while (reverse[reversePos] != NULL) {
+
+		while (reverse[reversePos] != '\0') {
 			//printf("%c ", ((char*)(mainFEN->buffer[(mainFEN->count - 1) - i]))[pos]);
 			switch (reverse[reversePos]) {
 
@@ -334,10 +338,13 @@ int main(int argc, char **argv) {
 
 	const u8 SIDE_TO_MOVE = COLOR;
 
-	if (strcmp(arg1, "perft") == 0)
+	if (strcmp(arg1, "perft") == 0) {
 		startPerft(SIDE_TO_MOVE, depth);
-	else if (strcmp(arg1, "divide") == 0)
+	} else if (strcmp(arg1, "divide") == 0) {
 		divide(depth, SIDE_TO_MOVE);
+	} 
+
+	printf("Score is %d\n\n", evaluate());
 
 	return 0;
 }

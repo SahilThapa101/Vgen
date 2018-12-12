@@ -5,7 +5,7 @@
  *      Author: Amar Thapa
  */
 
-#include "Globals.h"
+#include "globals.h"
 #include "movegen.h"
 #include "magicmoves.h"
 #include "nonslidingmoves.h"

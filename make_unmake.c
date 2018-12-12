@@ -1,7 +1,7 @@
 #include <stdbool.h>
 #include "make_unmake.h"
 #include "utility.h"
-#include "Globals.h"
+#include "globals.h"
 
 void make_move(u32 move) {
 
