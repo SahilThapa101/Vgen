@@ -1,7 +1,7 @@
 all: Vengeance
 
 Vengeance: main.o magicmoves.o nonslidingmoves.o movegen.o make_unmake.o utility.o perft.o dynarray.o evaluate.o search.o
-	gcc main.o magicmoves.o nonslidingmoves.o movegen.o make_unmake.o utility.o perft.o dynarray.o evaluate.o search.o -O3 -o Vengeance
+	gcc main.o magicmoves.o nonslidingmoves.o movegen.o make_unmake.o utility.o perft.o dynarray.o evaluate.o search.o -ggdb -O3 -o Vengeance
 
 main.o:	main.c
 	gcc -c main.c

@@ -18,6 +18,7 @@
 #include "perft.h"
 #include "dynarray.h"
 #include "evaluate.h"
+#include "search.h"
 
 u8 COLOR;
 
@@ -326,7 +327,11 @@ int main(int argc, char **argv) {
 	splitTheFEN();
 
 	char* arg1 = argv[1];
-	u8 depth = atoi(argv[2]);
+	u8 depth = 0;
+
+	if(argc > 2) {
+		depth = atoi(argv[2]);
+	}
 
 	printf("Depth = %d\n", depth);
 
@@ -339,12 +344,26 @@ int main(int argc, char **argv) {
 	const u8 SIDE_TO_MOVE = COLOR;
 
 	if (strcmp(arg1, "perft") == 0) {
+
 		startPerft(SIDE_TO_MOVE, depth);
 	} else if (strcmp(arg1, "divide") == 0) {
-		divide(depth, SIDE_TO_MOVE);
-	} 
 
-	printf("Score is %d\n\n", evaluate());
+		divide(depth, SIDE_TO_MOVE);
+	} else if(strcmp(arg1, "evaluate") == 0) {
+
+		printf("Score is %d\n\n", evaluate());		
+	} else if (strcmp(arg1, "search") == 0) {
+		struct hist defaultHist = { 0, 0, 0, 0 };
+
+		ply = 0;
+		hist[ply] = defaultHist;
+
+		moveStack[ply].epFlag = 
+		moveStack[ply].epSquare = moveStack[ply - 1].epSquare;
+		moveStack[ply].castleFlags  =  moveStack[ply - 1].castleFlags;
+
+		printf("Score is %d \n\n", search(depth, COLOR));
+	}
 
 	return 0;
 }

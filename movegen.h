@@ -12,6 +12,8 @@
 
 u32 createMove(u8 promotion_type, u8 castle_dir, u8 move_type, u8 color, u8 c_piece, u8 piece, u8 from, u8 to);
 
+u64 genCaptures(u32 *move_list, u8 color);
+
 u64 genMoves(u32 *move_list, u8 color);
 
 u64 genPushes(u32 *move_list, u8 pos, u8 color);

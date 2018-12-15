@@ -29,8 +29,6 @@ u64 perft(u8 depth, u8 color) {
 
 	for (i = 0; i < n_moves; i++) {
 
-
-
 		make_move(move_list[i]);
 
 		if (isSqAttacked(bitScanForward(pieceBB[sideToMove][KING]),

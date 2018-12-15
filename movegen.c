@@ -12,9 +12,33 @@
 #include "utility.h"
 
 typedef unsigned char u8;
+
+u64 genCaptures(u32 *move_list, u8 color) {
+
+	u32 pos = 0;
+	pos = genPawnAttacks(move_list, pos, color);
+
+	pos = genKnightAttacks(move_list, pos, color);
+
+
+	pos = genBishopAttacks(move_list, pos, color);
+	
+
+	pos = genRookAttacks(move_list, pos, color);
+	
+	
+	pos = genQueenAttacks(move_list, pos, color);
+
+	
+	pos = genKingAttacks(move_list, pos, color);
+
+	return pos;
+}
+
+
 u64 genMoves(u32 *move_list, u8 color) {
 
-	u8 pos = 0;
+	u32 pos = 0;
 
 	pos = genPushes(move_list, pos, color);
 	pos = genAttacks(move_list, pos, color);

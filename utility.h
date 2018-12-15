@@ -25,4 +25,6 @@ u64 bbFromAlgebricPos(char* posName);
 
 int popCount (u64 x); 
 
+char* algebricPos(u8 sq);
+
 #endif
