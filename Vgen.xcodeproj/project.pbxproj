@@ -7,6 +7,15 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		4E1DBABC21CF7CBF00ECA2F8 /* dynarray.c in Sources */ = {isa = PBXBuildFile; fileRef = 4E1DBABB21CF7CBF00ECA2F8 /* dynarray.c */; };
+		4E1DBABF21CF7E3D00ECA2F8 /* evaluate.c in Sources */ = {isa = PBXBuildFile; fileRef = 4E1DBABE21CF7E3D00ECA2F8 /* evaluate.c */; };
+		4E1DBAC521CF7F7200ECA2F8 /* magicmoves.c in Sources */ = {isa = PBXBuildFile; fileRef = 4E1DBAC421CF7F7200ECA2F8 /* magicmoves.c */; };
+		4E1DBAC821CF7FFA00ECA2F8 /* make_unmake.c in Sources */ = {isa = PBXBuildFile; fileRef = 4E1DBAC721CF7FFA00ECA2F8 /* make_unmake.c */; };
+		4E1DBACB21CF804000ECA2F8 /* movegen.c in Sources */ = {isa = PBXBuildFile; fileRef = 4E1DBACA21CF804000ECA2F8 /* movegen.c */; };
+		4E1DBACE21CF809F00ECA2F8 /* nonslidingmoves.c in Sources */ = {isa = PBXBuildFile; fileRef = 4E1DBACD21CF809F00ECA2F8 /* nonslidingmoves.c */; };
+		4E1DBAD121CF815000ECA2F8 /* perft.c in Sources */ = {isa = PBXBuildFile; fileRef = 4E1DBAD021CF815000ECA2F8 /* perft.c */; };
+		4E1DBAD521CF81BF00ECA2F8 /* search.c in Sources */ = {isa = PBXBuildFile; fileRef = 4E1DBAD421CF81BF00ECA2F8 /* search.c */; };
+		4E1DBAD821CF81F000ECA2F8 /* utility.c in Sources */ = {isa = PBXBuildFile; fileRef = 4E1DBAD721CF81F000ECA2F8 /* utility.c */; };
 		4EAE2F4E21CEEACA00B731D3 /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = 4EAE2F4D21CEEACA00B731D3 /* main.c */; };
 /* End PBXBuildFile section */
 
@@ -23,6 +32,27 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		4E1DBABA21CF7CBF00ECA2F8 /* dynarray.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = dynarray.h; sourceTree = "<group>"; };
+		4E1DBABB21CF7CBF00ECA2F8 /* dynarray.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = dynarray.c; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.c; };
+		4E1DBABD21CF7E3D00ECA2F8 /* evaluate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = evaluate.h; sourceTree = "<group>"; };
+		4E1DBABE21CF7E3D00ECA2F8 /* evaluate.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = evaluate.c; sourceTree = "<group>"; };
+		4E1DBAC121CF7EB900ECA2F8 /* globals.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = globals.h; sourceTree = "<group>"; };
+		4E1DBAC221CF7F4100ECA2F8 /* init.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = init.h; sourceTree = "<group>"; };
+		4E1DBAC321CF7F7200ECA2F8 /* magicmoves.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = magicmoves.h; sourceTree = "<group>"; };
+		4E1DBAC421CF7F7200ECA2F8 /* magicmoves.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = magicmoves.c; sourceTree = "<group>"; };
+		4E1DBAC621CF7FFA00ECA2F8 /* make_unmake.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = make_unmake.h; sourceTree = "<group>"; };
+		4E1DBAC721CF7FFA00ECA2F8 /* make_unmake.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = make_unmake.c; sourceTree = "<group>"; };
+		4E1DBAC921CF804000ECA2F8 /* movegen.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = movegen.h; sourceTree = "<group>"; };
+		4E1DBACA21CF804000ECA2F8 /* movegen.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = movegen.c; sourceTree = "<group>"; };
+		4E1DBACC21CF809F00ECA2F8 /* nonslidingmoves.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = nonslidingmoves.h; sourceTree = "<group>"; };
+		4E1DBACD21CF809F00ECA2F8 /* nonslidingmoves.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = nonslidingmoves.c; sourceTree = "<group>"; };
+		4E1DBACF21CF815000ECA2F8 /* perft.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = perft.h; sourceTree = "<group>"; };
+		4E1DBAD021CF815000ECA2F8 /* perft.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = perft.c; sourceTree = "<group>"; };
+		4E1DBAD221CF818E00ECA2F8 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		4E1DBAD321CF81BF00ECA2F8 /* search.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = search.h; sourceTree = "<group>"; };
+		4E1DBAD421CF81BF00ECA2F8 /* search.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = search.c; sourceTree = "<group>"; };
+		4E1DBAD621CF81F000ECA2F8 /* utility.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = utility.h; sourceTree = "<group>"; };
+		4E1DBAD721CF81F000ECA2F8 /* utility.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = utility.c; sourceTree = "<group>"; };
 		4EAE2F4A21CEEACA00B731D3 /* Vgen */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = Vgen; sourceTree = BUILT_PRODUCTS_DIR; };
 		4EAE2F4D21CEEACA00B731D3 /* main.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = main.c; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -58,6 +88,27 @@
 			isa = PBXGroup;
 			children = (
 				4EAE2F4D21CEEACA00B731D3 /* main.c */,
+				4E1DBABA21CF7CBF00ECA2F8 /* dynarray.h */,
+				4E1DBABB21CF7CBF00ECA2F8 /* dynarray.c */,
+				4E1DBABD21CF7E3D00ECA2F8 /* evaluate.h */,
+				4E1DBABE21CF7E3D00ECA2F8 /* evaluate.c */,
+				4E1DBAC121CF7EB900ECA2F8 /* globals.h */,
+				4E1DBAC221CF7F4100ECA2F8 /* init.h */,
+				4E1DBAC321CF7F7200ECA2F8 /* magicmoves.h */,
+				4E1DBAC421CF7F7200ECA2F8 /* magicmoves.c */,
+				4E1DBAC621CF7FFA00ECA2F8 /* make_unmake.h */,
+				4E1DBAC721CF7FFA00ECA2F8 /* make_unmake.c */,
+				4E1DBAC921CF804000ECA2F8 /* movegen.h */,
+				4E1DBACA21CF804000ECA2F8 /* movegen.c */,
+				4E1DBACC21CF809F00ECA2F8 /* nonslidingmoves.h */,
+				4E1DBACD21CF809F00ECA2F8 /* nonslidingmoves.c */,
+				4E1DBACF21CF815000ECA2F8 /* perft.h */,
+				4E1DBAD021CF815000ECA2F8 /* perft.c */,
+				4E1DBAD221CF818E00ECA2F8 /* README.md */,
+				4E1DBAD321CF81BF00ECA2F8 /* search.h */,
+				4E1DBAD421CF81BF00ECA2F8 /* search.c */,
+				4E1DBAD621CF81F000ECA2F8 /* utility.h */,
+				4E1DBAD721CF81F000ECA2F8 /* utility.c */,
 			);
 			path = Vgen;
 			sourceTree = "<group>";
@@ -118,7 +169,16 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4E1DBAD821CF81F000ECA2F8 /* utility.c in Sources */,
+				4E1DBAC521CF7F7200ECA2F8 /* magicmoves.c in Sources */,
+				4E1DBAD121CF815000ECA2F8 /* perft.c in Sources */,
 				4EAE2F4E21CEEACA00B731D3 /* main.c in Sources */,
+				4E1DBABF21CF7E3D00ECA2F8 /* evaluate.c in Sources */,
+				4E1DBACE21CF809F00ECA2F8 /* nonslidingmoves.c in Sources */,
+				4E1DBABC21CF7CBF00ECA2F8 /* dynarray.c in Sources */,
+				4E1DBAD521CF81BF00ECA2F8 /* search.c in Sources */,
+				4E1DBAC821CF7FFA00ECA2F8 /* make_unmake.c in Sources */,
+				4E1DBACB21CF804000ECA2F8 /* movegen.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
