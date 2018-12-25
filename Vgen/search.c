@@ -17,107 +17,198 @@
 #include "make_unmake.h"
 #include "utility.h"
 
+const int INFINITY = 30000;
+
 #ifndef piece_name
 char pieceName[2][8] = { { ' ', (char) 0, 'N', 'B', 'R', 'Q', 'K', '\0'}, { ' ', (char) 0, 'n', 'b', 'r', 'q', 'k', '\0'}};
 #endif
 
 u64 getZobristKeyForPosition() {
     
-    u8 piece = KING;
     u64 key = 0;
     u64 bitboard;
-    for(int i = 1; i <= piece; i++) {
-        for (int j = 0; j < 2; j++) {
+    
+    for(int j = 0; j < 6; j++) {
+    
+        for(int i = 0; i < 2; i++) {
             
-            bitboard = pieceBB[j][i];
-            while(bitboard) {
-                // j = color, piece = piece type, bitScanForward(bitboard) returns square of LSB
-                key ^= zobrist[j][piece][bitScanForward(bitboard)];
+            bitboard = pieceBB[i][j + 1];
+            while (bitboard) {
+                
+                key ^= zobrist[j][i][bitScanForward(bitboard)];
                 bitboard &= bitboard - 1;
             }
         }
     }
-    
+
     return key;
 }
 
 void search(u8 color) {
-    
+
     clock_t start, end;
     double cpu_time_used;
     const int MATE = 5000;
     u32 move;
     const u8 COLOR = color;
     LINE mainline;
-    
+
     start = clock();
     for(int i = 1; ; i++) {
         ply = 0;
-        
-        int score = alphabeta(COLOR, i, -10000, 10000, MATE, &mainline);
-        
-        // if(score >= MATE - 1000) {// Handle up to mate in 500 or so.
+    
+        //int score = alphabeta(COLOR, i, -INFINITY, INFINITY, MATE, &mainline);
+        int score = NegaMax(COLOR, i, -INFINITY, INFINITY, &mainline);
         
         //     printf("Mate in %d\n", (MATE - score + 1) / 2);
         // } else if(score <= -MATE + 1000) {
         
         //     printf("Mated in %d\n", (MATE + score) / 2);
         // }
-        
         end = clock();
-        
+
         cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
-        
+
         int numberOfMoves = mainline.cmove;
-        
+
         printf("\n%d) ", i);
         for (int j = 0; j < numberOfMoves; j++) {
-            
+
             move = mainline.argmove[j];
-            
+
             printf("%c%s-%s ", pieceName[colorType(move)][pieceType(move)],
                    algebricPos(from_sq(move)), algebricPos(to_sq(move)));
         }
-        
+
         printf(" %d %fs", score, cpu_time_used);
     }
 }
 
-int alphabeta(int color, int depth, int alpha, int beta, int mate, LINE *pline) {
-    
-    int hashf = hashfALPHA;
-    int value = ProbeHash(color, depth, alpha, beta);
-    if(value != VAL_UNKNOWN) {
-        
-        return value;
-    }
-    
-    if (depth == 0) {
-        
+int NegaMax(u8 color, int depth, int alpha, int beta, LINE *pline) {
+
+    if(depth <= 0) {
         pline->cmove = 0;
-        
-        int score = evaluate(color);
-        
-        RecordHash(color, depth, score, hashfEXACT);
-        
-        return score;
+        return evaluate(color);
     }
     
-    ply = ply + 1;
+    ply++;
     moveStack[ply].epFlag = moveStack[ply - 1].epFlag;
     moveStack[ply].epSquare = moveStack[ply - 1].epSquare;
     moveStack[ply].castleFlags  =  moveStack[ply - 1].castleFlags;
     
     LINE line;
-    
     u32 numberOfMoves;
     u32 moveList[MAX_MOVES];
     
     numberOfMoves = genMoves(moveList, color);
     
     int legalMoves = 0;
-    
     for (int i = 0; i < numberOfMoves; i++) {
+        
+        make_move(moveList[i]);
+        
+        if (!isKingInCheck(color)) {
+            
+            legalMoves++;
+            
+            int val = -NegaMax(color ^ 1, depth - 1, -beta, -alpha, &line);
+            unmake_move(moveList[i]);
+            
+            if(val >= beta) {
+                ply--;
+                
+                return beta;
+            }
+            
+            if (val > alpha) {
+                alpha = val;
+                
+                pline->argmove[0] = moveList[i];
+                memcpy(pline->argmove + 1, line.argmove, line.cmove * sizeof(u32));
+                pline->cmove = line.cmove + 1;
+            }
+        } else {
+            unmake_move(moveList[i]);
+        }
+    }
+    
+    ply--;
+    
+    if(legalMoves == 0) {
+        if(!isKingInCheck(color)) {
+            alpha = color ? 10 : -10;
+        } else {
+            alpha = color ? INFINITY + ply : -(INFINITY + ply);
+        }
+    }
+    
+    return alpha;
+}
+
+int sortByBestMoveFound(u32 *moveList, int count, u32 bestMove) {
+    
+    
+    return 0;
+}
+
+int alphabeta(u8 color, int depth, int alpha, int beta, int mate, LINE *pline) {
+    
+    u32 bestMove = 0;
+    int hashf = hashfALPHA;
+    int value = ProbeHash(color, depth, alpha, beta, &bestMove);
+    
+    if(value != VAL_UNKNOWN) {
+
+        return value;
+    }
+
+    if (depth == 0) {
+        
+        pline->cmove = 0;
+        
+        int score = Quiescense(color, alpha, beta);
+        
+        RecordHash(color, depth, score, hashfEXACT, bestMove);
+        
+        return score;
+    }
+    
+    ply++;
+    moveStack[ply].epFlag = moveStack[ply - 1].epFlag;
+    moveStack[ply].epSquare = moveStack[ply - 1].epSquare;
+    moveStack[ply].castleFlags  =  moveStack[ply - 1].castleFlags;
+    
+    LINE line;
+    
+    int numberOfMoves;
+    u32 unSortedMoveList[MAX_MOVES];
+    
+    numberOfMoves = genMoves(unSortedMoveList, color);
+    
+    // sort by bestMove
+    
+    int newCount = 0;
+    u32 *moveList = NULL;
+    u32 sortedMoveList[MAX_MOVES];
+    
+    if(bestMove == 0) {
+        
+        moveList = &unSortedMoveList[0];
+        newCount = numberOfMoves;
+        bestMove = moveList[0];
+    } else {
+        moveList = &sortedMoveList[0];
+        moveList[newCount] = bestMove;
+        newCount++;
+        for(int i = 0; i < numberOfMoves; i++) {
+            
+            moveList[newCount] = unSortedMoveList[i];
+            newCount++;
+        }
+    }
+    
+    int legalMoves = 0;
+    for (int i = 0; i < newCount; i++) {
         
         make_move(moveList[i]);
         
@@ -129,9 +220,9 @@ int alphabeta(int color, int depth, int alpha, int beta, int mate, LINE *pline) 
             
             if (val >= beta) {
                 
-                RecordHash(color, depth, beta, hashfBETA);
+                RecordHash(color, depth, beta, hashfBETA, bestMove);
+                ply--;
                 
-                ply = ply - 1;
                 return beta;
             }
             
@@ -140,6 +231,7 @@ int alphabeta(int color, int depth, int alpha, int beta, int mate, LINE *pline) 
                 hashf = hashfEXACT;
                 
                 alpha = val;
+                bestMove = moveList[i];
                 
                 pline->argmove[0] = moveList[i];
                 memcpy(pline->argmove + 1, line.argmove, line.cmove * sizeof(u32));
@@ -148,46 +240,47 @@ int alphabeta(int color, int depth, int alpha, int beta, int mate, LINE *pline) 
             
             legalMoves++;
             
-            continue;
+        } else {
+            unmake_move(moveList[i]);
         }
-        
-        unmake_move(moveList[i]);
     }
     
-    ply = ply - 1;
+    ply--;
     
     if(legalMoves == 0) {
         if (!isKingInCheck(color)) {
             // stalemate
-            float score = color ? 0.25 : -0.25;
-            RecordHash(color, depth, 0, hashf);
-            return score;
+            
+            alpha = color ? 10 : -10;
         } else {
             // checkmate
             
-            int score = color ? mate : -mate;
-            RecordHash(color, depth, score, hashf);
-            return score;
+            alpha = -mate + ply;
         }
     }
     
-    RecordHash(color, depth, 0, hashf);
+    RecordHash(color, depth, alpha, hashf, bestMove);
+    
     return alpha;
 }
 
-int Quies(int color, int alpha, int beta) {
+int Quiescense(u8 color, int alpha, int beta) {
+//
+//    if(isKingInCheck(color)) {
+//        return alphabeta(color ^ 1, 1, alpha, beta, mate, pline);
+//    }
     
-    int val = evaluate(color);
+    int standingPat = evaluate(color);
     
-    if (val >= beta) {
+    if (standingPat >= beta) {
         return beta;
     }
-    
-    if (val > alpha) {
-        alpha = val;
+
+    if(standingPat > alpha) {
+        alpha = standingPat;
     }
     
-    ply = ply + 1;
+    ply++;
     moveStack[ply].epFlag = moveStack[ply - 1].epFlag;
     moveStack[ply].epSquare = moveStack[ply - 1].epSquare;
     moveStack[ply].castleFlags  =  moveStack[ply - 1].castleFlags;
@@ -209,58 +302,36 @@ int Quies(int color, int alpha, int beta) {
     if(numberOfCaptures > 1) {
         MVV_LVA(moveList, numberOfCaptures);
     }
-
+    
     for (int i = 0; i < numberOfCaptures; i++) {
         
         make_move(moveList[i]);
         
         if (!isKingInCheck(color)) {
             
-            val = -Quies(color ^ 1, -beta, -alpha);
+            int score = -Quiescense(color ^ 1, -beta, -alpha);
             
             unmake_move(moveList[i]);
             
-            if (val >= beta) {
-                
-                ply = ply - 1;
+            if (score >= beta) {
+                ply--;
                 return beta;
             }
-            if (val > alpha) {
-                alpha = val;
-            }
             
-            continue;
+            if(score > alpha) {
+                alpha = score;
+            }
+        } else {
+            unmake_move(moveList[i]);
         }
-        
-        unmake_move(moveList[i]);
     }
-    
-    ply = ply - 1;
+    ply--;
     
     return alpha;
 }
 
 void MVV_LVA(u32 *moveList, u32 numberOfMoves) {
     
-    // int queenCapturesCounter = 0;
-    // int rookCapturesCounter = 0;
-    // int bishopCapturesCounter = 0;
-    // int knightCapturesCounter = 0;
-    // int pawnCapturesCounter = 0;
-    // int capturesCounter = 0;
-    
-    // u32 queenCaptures[MAX_MOVES];
-    // u32 rookCaptures[MAX_MOVES];
-    // u32 bishopCaptures[MAX_MOVES];
-    // u32 knightCaptures[MAX_MOVES];
-    // u32 pawnCaptures[MAX_MOVES];
-    
-//    for(int k = 0; k < numberOfMoves; k++) {
-//        u32 move = moveList[k];
-//        printf("%c%s-%s ", pieceName[colorType(move)][pieceType(move)],
-//               algebricPos(from_sq(move)), algebricPos(to_sq(move)));
-//    }
-//
     u8 cPiece;
     u8 piece;
     int score[MAX_MOVES];
@@ -269,7 +340,7 @@ void MVV_LVA(u32 *moveList, u32 numberOfMoves) {
         cPiece = cPieceType(moveList[k]);
         piece = pieceType(moveList[k]);
         
-        score[k] = 64 * cPiece - piece;
+        score[k] = (64 * cPiece) - piece;
     }
     
     u8 tempScore;
@@ -288,142 +359,9 @@ void MVV_LVA(u32 *moveList, u32 numberOfMoves) {
             }
         }
     }
-    
-//    for (i = 1; i < numberOfMoves; i++) {
-//        move = moveList[i];
-//        j = i - 1;
-//
-//        piece1 = cPieceType(moveList[j]);
-//        piece2 = pieceType(moveList[j]);
-//
-//        score1 = 64 * piece1 - piece2;
-//
-//        piece1 = cPieceType(move);
-//        piece2 = pieceType(move);
-//
-//        score2 = 64 * piece1 - piece2;
-//
-//        while (j >= 0 && score1 < score2) {
-//            moveList[j + 1] = moveList[j];
-//            score[j + 1] = score1;
-//            j = j - 1;
-//        }
-//
-//        moveList[j + 1] = move;
-//        score[j + 1] = score2;
-//    }
-    
-//    printf("\n");
-//    for(int l = 0; l < numberOfMoves; l++) {
-//        u32 move = moveList[l];
-//        printf("%c%s-%s(%d) ", pieceName[colorType(move)][pieceType(move)],
-//               algebricPos(from_sq(move)), algebricPos(to_sq(move)), score[l]);
-//    }
-
-//    printf("\n");
-//    printf("\n");
-
-    
-    // for(int i = 0; i < numberOfMoves; i++) {
-    
-    //     move = moveList[i];
-    
-    //     switch(cPieceType(move)) {
-    //         case QUEEN:
-    //             queenCaptures[queenCapturesCounter++] = move;
-    //             capturesCounter = capturesCounter + 1;
-    //             break;
-    //         case ROOKS:
-    //             rookCaptures[rookCapturesCounter++] = move;
-    //             capturesCounter = capturesCounter + 1;
-    //             break;
-    //         case BISHOPS:
-    //             bishopCaptures[bishopCapturesCounter++] = move;
-    //             capturesCounter = capturesCounter + 1;
-    //             break;
-    //         case KNIGHTS:
-    //             knightCaptures[knightCapturesCounter++] = move;
-    //             capturesCounter = capturesCounter + 1;
-    //             break;
-    //         case PAWNS:
-    //             pawnCaptures[pawnCapturesCounter++] = move;
-    //             capturesCounter = capturesCounter + 1;
-    //             break;
-    //         default:
-    //             break;
-    //     }
-    // }
-    
-    // if(queenCapturesCounter) {
-    //     sortByLVA(queenCaptures, queenCapturesCounter);
-    // }
-    // if(rookCapturesCounter) {
-    //     sortByLVA(rookCaptures, rookCapturesCounter);
-    // }
-    // if(bishopCapturesCounter) {
-    //     sortByLVA(bishopCaptures, bishopCapturesCounter);
-    // }
-    // if(knightCapturesCounter) {
-    //     sortByLVA(knightCaptures, knightCapturesCounter);
-    // }
-    // if(pawnCapturesCounter) {
-    //     sortByLVA(pawnCaptures, pawnCapturesCounter);
-    // }
-    
-    // u32 capturesSortedByMVA_LVA[MAX_MOVES];
-    
-    // int count = 0;
-    // int loopCount = 0;
-    // while(queenCapturesCounter > 0) {
-    
-    //     capturesSortedByMVA_LVA[count] = queenCaptures[loopCount];
-    //     queenCapturesCounter--;
-    //     loopCount++;
-    //     count++;
-    // }
-    
-    // loopCount = 0;
-    // while(rookCapturesCounter > 0) {
-    
-    //     capturesSortedByMVA_LVA[count] = rookCaptures[loopCount];
-    //     rookCapturesCounter--;
-    //     loopCount++;
-    //     count++;
-    // }
-    
-    // loopCount = 0;
-    // while(bishopCapturesCounter > 0) {
-    
-    //     capturesSortedByMVA_LVA[count] = bishopCaptures[loopCount];
-    //     bishopCapturesCounter--;
-    //     loopCount++;
-    //     count++;
-    // }
-    
-    // loopCount = 0;
-    // while(knightCapturesCounter > 0) {
-    
-    //     capturesSortedByMVA_LVA[count] = knightCaptures[loopCount];
-    //     knightCapturesCounter--;
-    //     loopCount++;
-    //     count++;
-    // }
-    
-    // loopCount = 0;
-    // while(pawnCapturesCounter > 0) {
-    
-    //     capturesSortedByMVA_LVA[count] = pawnCaptures[loopCount];
-    //     pawnCapturesCounter--;
-    //     loopCount++;
-    //     count++;
-    // }
-    
-    // moveList = &capturesSortedByMVA_LVA;
-    
-    // return capturesCounter;
 }
 
-int ProbeHash(int color, int depth, int alpha, int beta) {
+int ProbeHash(u8 color, int depth, int alpha, int beta, u32 *bestMove) {
     
     u64 key = getZobristKeyForPosition();
     
@@ -442,21 +380,23 @@ int ProbeHash(int color, int depth, int alpha, int beta) {
             }
             
             if ((phashe->flags == hashfALPHA) && (phashe->value <= alpha)) {
+                
                 return alpha;
             }
             
             if ((phashe->flags == hashfBETA) && (phashe->value >= beta)) {
+                
                 return beta;
             }
         }
         
-        // RememberBestMove();
+        *bestMove = phashe->move;
     }
     
     return VAL_UNKNOWN;
 }
 
-void RecordHash(int color, int depth, int val, int hashf) {
+void RecordHash(u8 color, int depth, int val, int hashf, u32 bestMove) {
     
     u64 key = getZobristKeyForPosition();
     
@@ -464,71 +404,15 @@ void RecordHash(int color, int depth, int val, int hashf) {
         key ^= KEY_BLACK_TO_MOVE;
     }
     
-    HASHE * phashe = &hashTable[key % HASH_TABLE_SIZE];
+    HASHE *phashe = &hashTable[key % HASH_TABLE_SIZE];
+    
+    if((phashe->key == key) && (phashe->depth > depth)) {
+        return;
+    }
     
     phashe->key = key;
-    // phashe->best = BestMove();
+    phashe->move = bestMove;
     phashe->value = val;
     phashe->flags = hashf;
     phashe->depth = depth;
 }
-
-
-// void sortByLVA(u32 *moveList, int numberOfMoves) {
-
-//     for(int i = numberOfMoves - 1; i >= 0; i--) {
-//          for (int j = 1; j <= i; j++)    {
-//              if (pieceType(moveList[j-1]) < pieceType(moveList[j])) {
-//                 u32 temp = moveList[j-1];
-//                 moveList[j-1] = moveList[j];
-//                 moveList[j] = temp;
-//                }
-//            }
-//        }
-// }
-
-// void sortByLVA(u32 *moveList, int numberOfMoves) {
-
-//     int i;
-//     int j;
-//     u32 move;
-//     for (i = 1; i < numberOfMoves; i++) {
-//         move = moveList[i];
-//         j = i - 1;
-
-//         while (j >= 0 && pieceType(moveList[j]) < pieceType(move)) {
-//             moveList[j + 1] = moveList[j];
-//             j = j - 1;
-//         }
-
-//         moveList[j + 1] = move;
-//     }
-// }
-
-// void insertionSort(int arr[], int n) {
-//    int i, key, j;
-//    for (i = 1; i < n; i++) {
-//        key = arr[i];
-//        j = i-1;
-
-//         Move elements of arr[0..i-1], that are
-//           greater than key, to one position ahead
-//           of their current position
-//        while (j >= 0 && arr[j] > key) {
-//            arr[j+1] = arr[j];
-//            j = j-1;
-//        }
-
-//        arr[j+1] = key;
-//    }
-// }
-
-
-
-
-
-
-
-
-
-

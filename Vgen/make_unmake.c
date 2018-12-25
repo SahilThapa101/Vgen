@@ -25,24 +25,24 @@ void make_move(u32 move) {
     
     piece = pieceType(move);
     c_piece = cPieceType(move);
-    color = colorType(move);
+    sideToMove = colorType(move);
     
     moveStack[ply].epFlag = 0;
     moveStack[ply].prevCastleFlags = moveStack[ply].castleFlags;
   
     switch (move_type(move)) {
             
-        case 0:
+        case MOVE_NORMAL:
             quiet++;
             
-            pieceBB[color][piece] ^= from_to_bb;
-            pieceBB[color][PIECES] ^= from_to_bb;
+            pieceBB[sideToMove][piece] ^= from_to_bb;
+            pieceBB[sideToMove][PIECES] ^= from_to_bb;
             occupied ^= from_to_bb;
             empty ^= from_to_bb;
             
             // update castle flags
             if (piece == KING) {
-                if (color == WHITE) {
+                if (sideToMove == WHITE) {
                     moveStack[ply].castleFlags &= ~(CastleFlagWhiteKing
                                                     | CastleFlagWhiteQueen);
                 } else {
@@ -54,20 +54,20 @@ void make_move(u32 move) {
             }
             
             break;
-        case 1:
+        case MOVE_CAPTURE:
             cap++;
             
-            pieceBB[color][piece] ^= from_to_bb;
-            pieceBB[color][PIECES] ^= from_to_bb;
-            pieceBB[color ^ 1][c_piece] ^= to_bb;
-            pieceBB[color ^ 1][PIECES] ^= to_bb;
+            pieceBB[sideToMove][piece] ^= from_to_bb;
+            pieceBB[sideToMove][PIECES] ^= from_to_bb;
+            pieceBB[sideToMove ^ 1][c_piece] ^= to_bb;
+            pieceBB[sideToMove ^ 1][PIECES] ^= to_bb;
             
             occupied ^= from_bb;
             empty ^= from_bb;
             
             // update castle flags
             if (piece == KING) {
-                if (color == WHITE) {
+                if (sideToMove == WHITE) {
                     moveStack[ply].castleFlags &= ~(CastleFlagWhiteKing
                                                     | CastleFlagWhiteQueen);
                 } else {
@@ -84,29 +84,29 @@ void make_move(u32 move) {
             
             break;
             
-        case 2:
+        case MOVE_DOUBLE_PUSH:
             quiet++;
             // pawn double pushes
             
             moveStack[ply].epFlag = 1;
-            moveStack[ply].epSquare = (from_bb << 8) >> 16 * color;
+            moveStack[ply].epSquare = (from_bb << 8) >> 16 * sideToMove;
             
-            pieceBB[color][piece] ^= from_to_bb;
-            pieceBB[color][PIECES] ^= from_to_bb;
+            pieceBB[sideToMove][piece] ^= from_to_bb;
+            pieceBB[sideToMove][PIECES] ^= from_to_bb;
             
             occupied ^= from_to_bb;
             empty ^= from_to_bb;
             
             break;
             
-        case 3:
+        case MOVE_ENPASSANT:
             ep++;
             //  en_passant capture
             
-            pieceBB[color][PAWNS] ^= from_to_bb;
-            pieceBB[color][PIECES] ^= from_to_bb;
+            pieceBB[sideToMove][PAWNS] ^= from_to_bb;
+            pieceBB[sideToMove][PIECES] ^= from_to_bb;
             
-            if (color == WHITE) {
+            if (sideToMove == WHITE) {
                 
                 pieceBB[BLACK][PAWNS] ^= (to_bb >> 8);
                 pieceBB[BLACK][PIECES] ^= (to_bb >> 8);
@@ -134,12 +134,12 @@ void make_move(u32 move) {
             
             break;
             
-        case 4:
+        case MOVE_CASTLE:
             cas++;
             
             u8 castleDirection = castleDir(move);
             
-            if (color == WHITE) {
+            if (sideToMove == WHITE) {
                 moveStack[ply].castleFlags &= ~(CastleFlagWhiteKing
                                                 | CastleFlagWhiteQueen);
                 
@@ -210,20 +210,20 @@ void make_move(u32 move) {
             
             break;
             
-        case MOVE_TYPE_PROMOTION:
+        case MOVE_PROMOTION:
             
             prom++;
             
             switch (promType(move)) {
                     
                 case PROMOTE_TO_QUEEN:
-                    pieceBB[color][PAWNS] ^= from_bb;
-                    pieceBB[color][QUEEN] ^= to_bb;
-                    pieceBB[color][PIECES] ^= from_to_bb;
+                    pieceBB[sideToMove][PAWNS] ^= from_bb;
+                    pieceBB[sideToMove][QUEEN] ^= to_bb;
+                    pieceBB[sideToMove][PIECES] ^= from_to_bb;
                     
                     if (c_piece != DUMMY) {
-                        pieceBB[color ^ 1][c_piece] ^= to_bb;
-                        pieceBB[color ^ 1][PIECES] ^= to_bb;
+                        pieceBB[sideToMove ^ 1][c_piece] ^= to_bb;
+                        pieceBB[sideToMove ^ 1][PIECES] ^= to_bb;
                         
                         occupied ^= from_bb;
                         empty ^= from_bb;
@@ -238,13 +238,13 @@ void make_move(u32 move) {
                     
                 case PROMOTE_TO_ROOK:
                     
-                    pieceBB[color][PAWNS] ^= from_bb;
-                    pieceBB[color][ROOKS] ^= to_bb;
-                    pieceBB[color][PIECES] ^= from_to_bb;
+                    pieceBB[sideToMove][PAWNS] ^= from_bb;
+                    pieceBB[sideToMove][ROOKS] ^= to_bb;
+                    pieceBB[sideToMove][PIECES] ^= from_to_bb;
                     
                     if (c_piece != DUMMY) {
-                        pieceBB[color ^ 1][c_piece] ^= to_bb;
-                        pieceBB[color ^ 1][PIECES] ^= to_bb;
+                        pieceBB[sideToMove ^ 1][c_piece] ^= to_bb;
+                        pieceBB[sideToMove ^ 1][PIECES] ^= to_bb;
                         
                         occupied ^= from_bb;
                         empty ^= from_bb;
@@ -257,13 +257,13 @@ void make_move(u32 move) {
                     break;
                     
                 case PROMOTE_TO_KNIGHT:
-                    pieceBB[color][PAWNS] ^= from_bb;
-                    pieceBB[color][KNIGHTS] ^= to_bb;
-                    pieceBB[color][PIECES] ^= from_to_bb;
+                    pieceBB[sideToMove][PAWNS] ^= from_bb;
+                    pieceBB[sideToMove][KNIGHTS] ^= to_bb;
+                    pieceBB[sideToMove][PIECES] ^= from_to_bb;
                     
                     if (c_piece != DUMMY) {
-                        pieceBB[color ^ 1][c_piece] ^= to_bb;
-                        pieceBB[color ^ 1][PIECES] ^= to_bb;
+                        pieceBB[sideToMove ^ 1][c_piece] ^= to_bb;
+                        pieceBB[sideToMove ^ 1][PIECES] ^= to_bb;
                         
                         occupied ^= from_bb;
                         empty ^= from_bb;
@@ -276,13 +276,13 @@ void make_move(u32 move) {
                     break;
                     
                 case PROMOTE_TO_BISHOP:
-                    pieceBB[color][PAWNS] ^= from_bb;
-                    pieceBB[color][BISHOPS] ^= to_bb;
-                    pieceBB[color][PIECES] ^= from_to_bb;
+                    pieceBB[sideToMove][PAWNS] ^= from_bb;
+                    pieceBB[sideToMove][BISHOPS] ^= to_bb;
+                    pieceBB[sideToMove][PIECES] ^= from_to_bb;
                     
                     if (c_piece != DUMMY) {
-                        pieceBB[color ^ 1][c_piece] ^= to_bb;
-                        pieceBB[color ^ 1][PIECES] ^= to_bb;
+                        pieceBB[sideToMove ^ 1][c_piece] ^= to_bb;
+                        pieceBB[sideToMove ^ 1][PIECES] ^= to_bb;
                         
                         occupied ^= from_bb;
                         empty ^= from_bb;
@@ -323,7 +323,7 @@ void unmake_move(u32 move) {
     
     switch (move_type(move)) {
             
-        case 0:
+        case MOVE_NORMAL:
             
             pieceBB[color][piece] ^= from_to_bb;
             pieceBB[color][PIECES] ^= from_to_bb;
@@ -332,7 +332,7 @@ void unmake_move(u32 move) {
             empty ^= from_to_bb;
             
             break;
-        case 1:
+        case MOVE_CAPTURE:
             
             pieceBB[color][piece] ^= from_to_bb;
             pieceBB[color][PIECES] ^= from_to_bb;
@@ -344,7 +344,7 @@ void unmake_move(u32 move) {
             empty ^= from_bb;
             
             break;
-        case 2:
+        case MOVE_DOUBLE_PUSH:
             
             pieceBB[color][piece] ^= from_to_bb;
             pieceBB[color][PIECES] ^= from_to_bb;
@@ -354,7 +354,7 @@ void unmake_move(u32 move) {
             
             break;
             
-        case 3:
+        case MOVE_ENPASSANT:
             
             pieceBB[color][PAWNS] ^= from_to_bb;
             pieceBB[color][PIECES] ^= from_to_bb;
@@ -386,7 +386,7 @@ void unmake_move(u32 move) {
             empty = ~occupied;
             
             break;
-        case 4:
+        case MOVE_CASTLE:
             
             if (castleDirection == WHITE_CASTLE_QUEEN_SIDE) {
                 
@@ -438,7 +438,7 @@ void unmake_move(u32 move) {
             empty = ~occupied;
             
             break;
-        case MOVE_TYPE_PROMOTION:
+        case MOVE_PROMOTION:
             
             switch (promType(move)) {
                     
@@ -520,3 +520,48 @@ void unmake_move(u32 move) {
     }
 }
 
+// @Todo Capture on RANK_1 and RANK_8 by pawns
+void QuiecenseMakeMove(u32 move) {
+    
+    u64 from_bb, to_bb, from_to_bb, piece, c_piece;
+    
+    from_bb = index_bb[from_sq(move)];
+    to_bb = index_bb[to_sq(move)];
+    
+    from_to_bb = from_bb ^ to_bb;
+    
+    piece = pieceType(move);
+    c_piece = cPieceType(move);
+    sideToMove = colorType(move);
+    
+    pieceBB[sideToMove][piece] ^= from_to_bb;
+    pieceBB[sideToMove][PIECES] ^= from_to_bb;
+    pieceBB[sideToMove ^ 1][c_piece] ^= to_bb;
+    pieceBB[sideToMove ^ 1][PIECES] ^= to_bb;
+    
+    occupied ^= from_bb;
+    empty ^= from_bb;
+}
+
+void QuiecenseUnMakeMove(u32 move) {
+    
+    u64 from_bb, to_bb, from_to_bb, piece, c_piece;
+    
+    from_bb = index_bb[from_sq(move)];
+    to_bb = index_bb[to_sq(move)];
+    
+    from_to_bb = from_bb ^ to_bb;
+    
+    piece = pieceType(move);
+    c_piece = cPieceType(move);
+    sideToMove = colorType(move);
+    
+    pieceBB[sideToMove][piece] ^= from_to_bb;
+    pieceBB[sideToMove][PIECES] ^= from_to_bb;
+    
+    pieceBB[sideToMove ^ 1][c_piece] ^= to_bb;
+    pieceBB[sideToMove ^ 1][PIECES] ^= to_bb;
+    
+    occupied ^= from_bb;
+    empty ^= from_bb;
+}

@@ -33,4 +33,6 @@ char* algebricPos(u8 sq);
 
 u64 rand64(void);
 
+void clearAllBitBoards(void);
+
 #endif /* utility_h */

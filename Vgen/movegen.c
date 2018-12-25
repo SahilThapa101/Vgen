@@ -29,12 +29,12 @@ u8 genCaptures(u32 *move_list, u8 color) {
     return pos;
 }
 
-
 u8 genMoves(u32 *move_list, u8 color) {
     
     u32 pos = 0;
     
     pos = genAttacks(move_list, pos, color);
+    MVV_LVA(move_list, pos);
     pos = genSpecialMoves(move_list, pos, color);
     pos = genPushes(move_list, pos, color);
     
@@ -75,7 +75,7 @@ u8 genSpecialMoves(u32 *move_list, u8 pos, u8 color) {
     return pos;
 }
 
-/* pushes aka quiet moves */
+/* pushes aka normal/quiet moves */
 
 u8 genKingPushes(u32 *move_list, u8 pos, u8 color) {
     
@@ -91,8 +91,7 @@ u8 genKingPushes(u32 *move_list, u8 pos, u8 color) {
             const u8 to = bitScanForward(pushes);
             pushes &= pushes - 1;
             
-            move_list[pos++] = createMove(0, 0, 0, color, DUMMY, KING, from,
-                                          to);
+            move_list[pos++] = createMove(0, 0, MOVE_NORMAL, color, DUMMY, KING, from, to);
         }
     }
     
@@ -113,8 +112,7 @@ u8 genQueenPushes(u32 *move_list, u8 pos, u8 color) {
             const u8 to = bitScanForward(pushes);
             pushes &= pushes - 1;
             
-            move_list[pos++] = createMove(0, 0, 0, color, DUMMY, QUEEN, from,
-                                          to);
+            move_list[pos++] = createMove(0, 0, MOVE_NORMAL, color, DUMMY, QUEEN, from, to);
         }
     }
     
@@ -134,8 +132,7 @@ u8 genBishopPushes(u32 *move_list, u8 pos, u8 color) {
             const u8 to = bitScanForward(pushes);
             pushes &= pushes - 1;
             
-            move_list[pos++] = createMove(0, 0, 0, color, DUMMY, BISHOPS, from,
-                                          to);
+            move_list[pos++] = createMove(0, 0, MOVE_NORMAL, color, DUMMY, BISHOPS, from, to);
         }
     }
     
@@ -156,8 +153,7 @@ u8 genKnightPushes(u32 *move_list, u8 pos, u8 color) {
             const u8 to = bitScanForward(pushes);
             pushes &= pushes - 1;
             
-            move_list[pos++] = createMove(0, 0, 0, color, DUMMY, KNIGHTS, from,
-                                          to);
+            move_list[pos++] = createMove(0, 0, MOVE_NORMAL, color, DUMMY, KNIGHTS, from, to);
         }
     }
     
@@ -177,8 +173,7 @@ u8 genRookPushes(u32 *move_list, u8 pos, u8 color) {
             const u8 to = bitScanForward(pushes);
             pushes &= pushes - 1;
             
-            move_list[pos++] = createMove(0, 0, 0, color, DUMMY, ROOKS, from,
-                                          to);
+            move_list[pos++] = createMove(0, 0, MOVE_NORMAL, color, DUMMY, ROOKS, from, to);
         }
     }
     
@@ -218,25 +213,11 @@ u8 genPawnPushes(u32 *move_list, u8 pos, u8 color) {
         
         from = bitScanForward(fromBB);
         
-        move_list[pos++] = createMove(0, 0, 0, color, DUMMY, PAWNS, from, to);
+        move_list[pos++] = createMove(0, 0, MOVE_NORMAL, color, DUMMY, PAWNS, from, to);
         
         targetSquares &= targetSquares - 1;
     }
-    
-    //    u64 pawns_single_push_target_squares = ((pawnsBB << 8) >> (16 * color)) & empty;
-    //
-    //    u64 pawns_can_push = (pawns_single_push_target_squares >> 8) << (16 * (color));
-    //
-    //    while (pawns_can_push) {
-    //        const u8 from = bit_scan_forward(pawns_can_push);
-    //        pawns_can_push &= pawns_can_push - 1;
-    //        const u8 to = bit_scan_forward(pawns_single_push_target_squares);
-    //        pawns_single_push_target_squares &= pawns_single_push_target_squares
-    //                - 1;
-    //
-    //        move_list[pos++] = create_move(0, 0, 0, color, DUMMY, PAWNS, from, to);
-    //    }
-    
+
     return pos;
 }
 
@@ -265,7 +246,7 @@ u8 genDoublePushes(u32 *move_list, u8 pos, u8 color) {
         pawns_double_push_target_squares &= pawns_double_push_target_squares
         - 1;
         
-        move_list[pos++] = createMove(0, 0, 2, color, DUMMY, PAWNS, from, to);
+        move_list[pos++] = createMove(0, 0, MOVE_DOUBLE_PUSH, color, DUMMY, PAWNS, from, to);
     }
     
     return pos;
@@ -288,8 +269,7 @@ u8 genKingAttacks(u32 *move_list, u8 pos, u8 color) {
             attacks &= attacks - 1;
             
             if (index_bb[to] & pieceBB[color ^ 1][QUEEN]) {
-                move_list[pos++] = createMove(0, 0, 1, color, QUEEN, KING,
-                                              from, to);
+                move_list[pos++] = createMove(0, 0, MOVE_CAPTURE, color, QUEEN, KING, from, to);
             }
             
             if (pieceBB[color ^ 1][BISHOPS]) {
@@ -299,8 +279,7 @@ u8 genKingAttacks(u32 *move_list, u8 pos, u8 color) {
                     bishops_bb &= bishops_bb - 1;
                     
                     if (sq == to)
-                        move_list[pos++] = createMove(0, 0, 1, color, BISHOPS,
-                                                      KING, from, to);
+                        move_list[pos++] = createMove(0, 0, MOVE_CAPTURE, color, BISHOPS, KING, from, to);
                 }
             }
             
@@ -311,8 +290,7 @@ u8 genKingAttacks(u32 *move_list, u8 pos, u8 color) {
                     knights_bb &= knights_bb - 1;
                     
                     if (sq == to)
-                        move_list[pos++] = createMove(0, 0, 1, color, KNIGHTS,
-                                                      KING, from, to);
+                        move_list[pos++] = createMove(0, 0, MOVE_CAPTURE, color, KNIGHTS, KING, from, to);
                 }
             }
             
@@ -323,8 +301,7 @@ u8 genKingAttacks(u32 *move_list, u8 pos, u8 color) {
                     rooks_bb &= rooks_bb - 1;
                     
                     if (sq == to)
-                        move_list[pos++] = createMove(0, 0, 1, color, ROOKS,
-                                                      KING, from, to);
+                        move_list[pos++] = createMove(0, 0, MOVE_CAPTURE, color, ROOKS, KING, from, to);
                 }
             }
             
@@ -335,11 +312,9 @@ u8 genKingAttacks(u32 *move_list, u8 pos, u8 color) {
                     pawns_bb &= pawns_bb - 1;
                     
                     if (sq == to)
-                        move_list[pos++] = createMove(0, 0, 1, color, PAWNS,
-                                                      KING, from, to);
+                        move_list[pos++] = createMove(0, 0, MOVE_CAPTURE, color, PAWNS, KING, from, to);
                 }
             }
-            
         }
     }
     
@@ -359,8 +334,7 @@ u8 genQueenAttacks(u32 *move_list, u8 pos, u8 color) {
             attacks &= attacks - 1;
             
             if (index_bb[to] & pieceBB[color ^ 1][QUEEN]) {
-                move_list[pos++] = createMove(0, 0, 1, color, QUEEN, QUEEN,
-                                              from, to);
+                move_list[pos++] = createMove(0, 0, MOVE_CAPTURE, color, QUEEN, QUEEN, from, to);
             }
             
             if (pieceBB[color ^ 1][BISHOPS]) {
@@ -370,8 +344,7 @@ u8 genQueenAttacks(u32 *move_list, u8 pos, u8 color) {
                     bishops_bb &= bishops_bb - 1;
                     
                     if (sq == to)
-                        move_list[pos++] = createMove(0, 0, 1, color, BISHOPS,
-                                                      QUEEN, from, to);
+                        move_list[pos++] = createMove(0, 0, MOVE_CAPTURE, color, BISHOPS, QUEEN, from, to);
                 }
             }
             
@@ -382,8 +355,7 @@ u8 genQueenAttacks(u32 *move_list, u8 pos, u8 color) {
                     knights_bb &= knights_bb - 1;
                     
                     if (sq == to)
-                        move_list[pos++] = createMove(0, 0, 1, color, KNIGHTS,
-                                                      QUEEN, from, to);
+                        move_list[pos++] = createMove(0, 0, MOVE_CAPTURE, color, KNIGHTS, QUEEN, from, to);
                 }
             }
             
@@ -394,8 +366,7 @@ u8 genQueenAttacks(u32 *move_list, u8 pos, u8 color) {
                     rooks_bb &= rooks_bb - 1;
                     
                     if (sq == to)
-                        move_list[pos++] = createMove(0, 0, 1, color, ROOKS,
-                                                      QUEEN, from, to);
+                        move_list[pos++] = createMove(0, 0, MOVE_CAPTURE, color, ROOKS, QUEEN, from, to);
                 }
             }
             
@@ -406,11 +377,9 @@ u8 genQueenAttacks(u32 *move_list, u8 pos, u8 color) {
                     pawns_bb &= pawns_bb - 1;
                     
                     if (sq == to)
-                        move_list[pos++] = createMove(0, 0, 1, color, PAWNS,
-                                                      QUEEN, from, to);
+                        move_list[pos++] = createMove(0, 0, MOVE_CAPTURE, color, PAWNS, QUEEN, from, to);
                 }
             }
-            
         }
     }
     return pos;
@@ -431,8 +400,7 @@ u8 genBishopAttacks(u32 *move_list, u8 pos, u8 color) {
             attacks &= attacks - 1;
             
             if (index_bb[to] & pieceBB[color ^ 1][QUEEN]) {
-                move_list[pos++] = createMove(0, 0, 1, color, QUEEN, BISHOPS,
-                                              from, to);
+                move_list[pos++] = createMove(0, 0, MOVE_CAPTURE, color, QUEEN, BISHOPS, from, to);
             }
             
             if (pieceBB[color ^ 1][BISHOPS]) {
@@ -442,8 +410,7 @@ u8 genBishopAttacks(u32 *move_list, u8 pos, u8 color) {
                     bishops_bb &= bishops_bb - 1;
                     
                     if (sq == to)
-                        move_list[pos++] = createMove(0, 0, 1, color, BISHOPS,
-                                                      BISHOPS, from, to);
+                        move_list[pos++] = createMove(0, 0, MOVE_CAPTURE, color, BISHOPS, BISHOPS, from, to);
                 }
             }
             
@@ -454,8 +421,7 @@ u8 genBishopAttacks(u32 *move_list, u8 pos, u8 color) {
                     knights_bb &= knights_bb - 1;
                     
                     if (sq == to)
-                        move_list[pos++] = createMove(0, 0, 1, color, KNIGHTS,
-                                                      BISHOPS, from, to);
+                        move_list[pos++] = createMove(0, 0, MOVE_CAPTURE, color, KNIGHTS, BISHOPS, from, to);
                 }
             }
             
@@ -466,8 +432,7 @@ u8 genBishopAttacks(u32 *move_list, u8 pos, u8 color) {
                     rooks_bb &= rooks_bb - 1;
                     
                     if (sq == to)
-                        move_list[pos++] = createMove(0, 0, 1, color, ROOKS,
-                                                      BISHOPS, from, to);
+                        move_list[pos++] = createMove(0, 0, MOVE_CAPTURE, color, ROOKS, BISHOPS, from, to);
                 }
             }
             
@@ -478,11 +443,9 @@ u8 genBishopAttacks(u32 *move_list, u8 pos, u8 color) {
                     pawns_bb &= pawns_bb - 1;
                     
                     if (sq == to)
-                        move_list[pos++] = createMove(0, 0, 1, color, PAWNS,
-                                                      BISHOPS, from, to);
+                        move_list[pos++] = createMove(0, 0, MOVE_CAPTURE, color, PAWNS, BISHOPS, from, to);
                 }
             }
-            
         }
     }
     
@@ -505,8 +468,7 @@ u8 genKnightAttacks(u32 *move_list, u8 pos, u8 color) {
             attacks &= attacks - 1;
             
             if (index_bb[to] & pieceBB[color ^ 1][QUEEN]) {
-                move_list[pos++] = createMove(0, 0, 1, color, QUEEN, KNIGHTS,
-                                              from, to);
+                move_list[pos++] = createMove(0, 0, MOVE_CAPTURE, color, QUEEN, KNIGHTS, from, to);
             }
             
             if (pieceBB[color ^ 1][BISHOPS]) {
@@ -516,8 +478,7 @@ u8 genKnightAttacks(u32 *move_list, u8 pos, u8 color) {
                     bishops_bb &= bishops_bb - 1;
                     
                     if (sq == to)
-                        move_list[pos++] = createMove(0, 0, 1, color, BISHOPS,
-                                                      KNIGHTS, from, to);
+                        move_list[pos++] = createMove(0, 0, MOVE_CAPTURE, color, BISHOPS, KNIGHTS, from, to);
                 }
             }
             
@@ -528,8 +489,7 @@ u8 genKnightAttacks(u32 *move_list, u8 pos, u8 color) {
                     knights_bb &= knights_bb - 1;
                     
                     if (sq == to)
-                        move_list[pos++] = createMove(0, 0, 1, color, KNIGHTS,
-                                                      KNIGHTS, from, to);
+                        move_list[pos++] = createMove(0, 0, MOVE_CAPTURE, color, KNIGHTS, KNIGHTS, from, to);
                 }
             }
             
@@ -540,8 +500,7 @@ u8 genKnightAttacks(u32 *move_list, u8 pos, u8 color) {
                     rooks_bb &= rooks_bb - 1;
                     
                     if (sq == to)
-                        move_list[pos++] = createMove(0, 0, 1, color, ROOKS,
-                                                      KNIGHTS, from, to);
+                        move_list[pos++] = createMove(0, 0, MOVE_CAPTURE, color, ROOKS, KNIGHTS, from, to);
                 }
             }
             
@@ -553,12 +512,10 @@ u8 genKnightAttacks(u32 *move_list, u8 pos, u8 color) {
                     
                     if (sq == to) {
                         
-                        move_list[pos++] = createMove(0, 0, 1, color, PAWNS,
-                                                      KNIGHTS, from, to);
+                        move_list[pos++] = createMove(0, 0, MOVE_CAPTURE, color, PAWNS, KNIGHTS, from, to);
                     }
                 }
             }
-            
         }
     }
     
@@ -578,8 +535,7 @@ u8 genRookAttacks(u32 *move_list, u8 pos, u8 color) {
             attacks &= attacks - 1;
             
             if (index_bb[to] & pieceBB[color ^ 1][QUEEN]) {
-                move_list[pos++] = createMove(0, 0, 1, color, QUEEN, ROOKS,
-                                              from, to);
+                move_list[pos++] = createMove(0, 0, MOVE_CAPTURE, color, QUEEN, ROOKS, from, to);
             }
             
             if (pieceBB[color ^ 1][BISHOPS]) {
@@ -589,8 +545,7 @@ u8 genRookAttacks(u32 *move_list, u8 pos, u8 color) {
                     bishops_bb &= bishops_bb - 1;
                     
                     if (sq == to) {
-                        move_list[pos++] = createMove(0, 0, 1, color, BISHOPS,
-                                                      ROOKS, from, to);
+                        move_list[pos++] = createMove(0, 0, MOVE_CAPTURE, color, BISHOPS, ROOKS, from, to);
                     }
                 }
             }
@@ -602,8 +557,7 @@ u8 genRookAttacks(u32 *move_list, u8 pos, u8 color) {
                     knights_bb &= knights_bb - 1;
                     
                     if (sq == to)
-                        move_list[pos++] = createMove(0, 0, 1, color, KNIGHTS,
-                                                      ROOKS, from, to);
+                        move_list[pos++] = createMove(0, 0, MOVE_CAPTURE, color, KNIGHTS, ROOKS, from, to);
                 }
             }
             
@@ -614,8 +568,7 @@ u8 genRookAttacks(u32 *move_list, u8 pos, u8 color) {
                     rooks_bb &= rooks_bb - 1;
                     
                     if (sq == to)
-                        move_list[pos++] = createMove(0, 0, 1, color, ROOKS,
-                                                      ROOKS, from, to);
+                        move_list[pos++] = createMove(0, 0, MOVE_CAPTURE, color, ROOKS, ROOKS, from, to);
                 }
             }
             
@@ -628,12 +581,10 @@ u8 genRookAttacks(u32 *move_list, u8 pos, u8 color) {
                     
                     if (sq == to) {
                         
-                        move_list[pos++] = createMove(0, 0, 1, color, PAWNS,
-                                                      ROOKS, from, to);
+                        move_list[pos++] = createMove(0, 0, MOVE_CAPTURE, color, PAWNS, ROOKS, from, to);
                     }
                 }
             }
-            
         }
     }
     
@@ -679,15 +630,13 @@ u8 genPawnAttacks(u32 *move_list, u8 pos, u8 color) {
                     pawns_bb &= pawns_bb - 1;
                     
                     if (sq == to) {
-                        move_list[pos++] = createMove(0, 0, 1, color, PAWNS,
-                                                      PAWNS, from, to);
+                        move_list[pos++] = createMove(0, 0, MOVE_CAPTURE, color, PAWNS, PAWNS, from, to);
                     }
                 }
             }
             
             if (index_bb[to] & pieceBB[color ^ 1][QUEEN]) {
-                move_list[pos++] = createMove(0, 0, 1, color, QUEEN, PAWNS,
-                                              from, to);
+                move_list[pos++] = createMove(0, 0, MOVE_CAPTURE, color, QUEEN, PAWNS, from, to);
             }
             
             if (pieceBB[color ^ 1][BISHOPS]) {
@@ -697,8 +646,7 @@ u8 genPawnAttacks(u32 *move_list, u8 pos, u8 color) {
                     bishops_bb &= bishops_bb - 1;
                     
                     if (sq == to)
-                        move_list[pos++] = createMove(0, 0, 1, color, BISHOPS,
-                                                      PAWNS, from, to);
+                        move_list[pos++] = createMove(0, 0, MOVE_CAPTURE, color, BISHOPS, PAWNS, from, to);
                 }
             }
             
@@ -709,8 +657,7 @@ u8 genPawnAttacks(u32 *move_list, u8 pos, u8 color) {
                     knights_bb &= knights_bb - 1;
                     
                     if (sq == to)
-                        move_list[pos++] = createMove(0, 0, 1, color, KNIGHTS,
-                                                      PAWNS, from, to);
+                        move_list[pos++] = createMove(0, 0, MOVE_CAPTURE, color, KNIGHTS, PAWNS, from, to);
                 }
             }
             
@@ -721,8 +668,7 @@ u8 genPawnAttacks(u32 *move_list, u8 pos, u8 color) {
                     rooks_bb &= rooks_bb - 1;
                     
                     if (sq == to)
-                        move_list[pos++] = createMove(0, 0, 1, color, ROOKS,
-                                                      PAWNS, from, to);
+                        move_list[pos++] = createMove(0, 0, MOVE_CAPTURE, color, ROOKS, PAWNS, from, to);
                 }
             }
         }
@@ -741,7 +687,7 @@ u8 genCastlingMoves(u32 *move_list, u8 pos, u8 color) {
                 && !(isSqAttacked(2, WHITE) || isSqAttacked(3, WHITE)
                      || isSqAttacked(4, WHITE))) {
                     
-                    u32 move = createMove(0, 0, 4, 0, ROOKS, KING, 4, 2);
+                    u32 move = createMove(0, 0, MOVE_CASTLE, WHITE, ROOKS, KING, 4, 2);
                     move_list[pos++] = move;
                 }
         }
@@ -753,7 +699,7 @@ u8 genCastlingMoves(u32 *move_list, u8 pos, u8 color) {
             if (wk_sqs == WK_SIDE_SQS
                 && !(isSqAttacked(4, WHITE) || isSqAttacked(5, WHITE)
                      || isSqAttacked(6, WHITE))) {
-                    u32 move = createMove(0, 1, 4, 0, ROOKS, KING, 4, 6);
+                    u32 move = createMove(0, 1, MOVE_CASTLE, WHITE, ROOKS, KING, 4, 6);
                     move_list[pos++] = move;
                 }
         }
@@ -767,7 +713,7 @@ u8 genCastlingMoves(u32 *move_list, u8 pos, u8 color) {
                 && !(isSqAttacked(58, BLACK) || isSqAttacked(59, BLACK)
                      || isSqAttacked(60, BLACK))) {
                     
-                    u32 move = createMove(0, 2, 4, 1, ROOKS, KING, 60, 58);
+                    u32 move = createMove(0, 2, MOVE_CASTLE, BLACK, ROOKS, KING, 60, 58);
                     move_list[pos++] = move;
                 }
             
@@ -780,7 +726,7 @@ u8 genCastlingMoves(u32 *move_list, u8 pos, u8 color) {
             if (bk_sqs == BK_SIDE_SQS
                 && !(isSqAttacked(60, BLACK) || isSqAttacked(61, BLACK)
                      || isSqAttacked(62, BLACK))) {
-                    u32 move = createMove(0, 3, 4, 1, ROOKS, KING, 60, 62);
+                    u32 move = createMove(0, 3, MOVE_CASTLE, BLACK, ROOKS, KING, 60, 62);
                     move_list[pos++] = move;
                 }
         }
@@ -819,7 +765,7 @@ u8 genEnpassantMoves(u32 *move_list, u8 pos, u8 color) {
             
             target_pawns &= target_pawns - 1;
             
-            move = createMove(0, 0, 3, color, PAWNS, PAWNS, from, to);
+            move = createMove(0, 0, MOVE_ENPASSANT, color, PAWNS, PAWNS, from, to);
             move_list[pos++] = move;
             
         }
@@ -881,14 +827,10 @@ u8 genPromotions(u32 *move_list, u8 pos, u8 color) {
                     queenBB &= queenBB - 1;
                     
                     if (sq == to)  {
-                        move_list[pos++] = createMove(PROMOTE_TO_QUEEN, 0,
-                                                      MOVE_TYPE_PROMOTION, color, QUEEN, PAWNS, from, to);
-                        move_list[pos++] = createMove(PROMOTE_TO_ROOK, 0,
-                                                      MOVE_TYPE_PROMOTION, color, QUEEN, PAWNS, from, to);
-                        move_list[pos++] = createMove(PROMOTE_TO_BISHOP, 0,
-                                                      MOVE_TYPE_PROMOTION, color, QUEEN, PAWNS, from, to);
-                        move_list[pos++] = createMove(PROMOTE_TO_KNIGHT, 0,
-                                                      MOVE_TYPE_PROMOTION, color, QUEEN, PAWNS, from, to);
+                        move_list[pos++] = createMove(PROMOTE_TO_QUEEN, 0, MOVE_PROMOTION, color, QUEEN, PAWNS, from, to);
+                        move_list[pos++] = createMove(PROMOTE_TO_ROOK, 0, MOVE_PROMOTION, color, QUEEN, PAWNS, from, to);
+                        move_list[pos++] = createMove(PROMOTE_TO_BISHOP, 0, MOVE_PROMOTION, color, QUEEN, PAWNS, from, to);
+                        move_list[pos++] = createMove(PROMOTE_TO_KNIGHT, 0, MOVE_PROMOTION, color, QUEEN, PAWNS, from, to);
                     }
                 }
             }
@@ -904,14 +846,10 @@ u8 genPromotions(u32 *move_list, u8 pos, u8 color) {
                     
                     if (sq == to) {
                         
-                        move_list[pos++] = createMove(PROMOTE_TO_QUEEN, 0,
-                                                      MOVE_TYPE_PROMOTION, color, ROOKS, PAWNS, from, to);
-                        move_list[pos++] = createMove(PROMOTE_TO_ROOK, 0,
-                                                      MOVE_TYPE_PROMOTION, color, ROOKS, PAWNS, from, to);
-                        move_list[pos++] = createMove(PROMOTE_TO_BISHOP, 0,
-                                                      MOVE_TYPE_PROMOTION, color, ROOKS, PAWNS, from, to);
-                        move_list[pos++] = createMove(PROMOTE_TO_KNIGHT, 0,
-                                                      MOVE_TYPE_PROMOTION, color, ROOKS, PAWNS, from, to);
+                        move_list[pos++] = createMove(PROMOTE_TO_QUEEN, 0, MOVE_PROMOTION, color, ROOKS, PAWNS, from, to);
+                        move_list[pos++] = createMove(PROMOTE_TO_ROOK, 0, MOVE_PROMOTION, color, ROOKS, PAWNS, from, to);
+                        move_list[pos++] = createMove(PROMOTE_TO_BISHOP, 0, MOVE_PROMOTION, color, ROOKS, PAWNS, from, to);
+                        move_list[pos++] = createMove(PROMOTE_TO_KNIGHT, 0, MOVE_PROMOTION, color, ROOKS, PAWNS, from, to);
                     }
                 }
             }
@@ -927,18 +865,10 @@ u8 genPromotions(u32 *move_list, u8 pos, u8 color) {
                     
                     if (sq == to) {
                         
-                        move_list[pos++] = createMove(PROMOTE_TO_QUEEN, 0,
-                                                      MOVE_TYPE_PROMOTION, color, BISHOPS, PAWNS, from,
-                                                      to);
-                        move_list[pos++] = createMove(PROMOTE_TO_ROOK, 0,
-                                                      MOVE_TYPE_PROMOTION, color, BISHOPS, PAWNS, from,
-                                                      to);
-                        move_list[pos++] = createMove(PROMOTE_TO_BISHOP, 0,
-                                                      MOVE_TYPE_PROMOTION, color, BISHOPS, PAWNS, from,
-                                                      to);
-                        move_list[pos++] = createMove(PROMOTE_TO_KNIGHT, 0,
-                                                      MOVE_TYPE_PROMOTION, color, BISHOPS, PAWNS, from,
-                                                      to);
+                        move_list[pos++] = createMove(PROMOTE_TO_QUEEN, 0, MOVE_PROMOTION, color, BISHOPS, PAWNS, from, to);
+                        move_list[pos++] = createMove(PROMOTE_TO_ROOK, 0, MOVE_PROMOTION, color, BISHOPS, PAWNS, from, to);
+                        move_list[pos++] = createMove(PROMOTE_TO_BISHOP, 0, MOVE_PROMOTION, color, BISHOPS, PAWNS, from, to);
+                        move_list[pos++] = createMove(PROMOTE_TO_KNIGHT, 0, MOVE_PROMOTION, color, BISHOPS, PAWNS, from, to);
                     }
                 }
             }
@@ -954,18 +884,10 @@ u8 genPromotions(u32 *move_list, u8 pos, u8 color) {
                     
                     if (sq == to) {
                         
-                        move_list[pos++] = createMove(PROMOTE_TO_QUEEN, 0,
-                                                      MOVE_TYPE_PROMOTION, color, KNIGHTS, PAWNS, from,
-                                                      to);
-                        move_list[pos++] = createMove(PROMOTE_TO_ROOK, 0,
-                                                      MOVE_TYPE_PROMOTION, color, KNIGHTS, PAWNS, from,
-                                                      to);
-                        move_list[pos++] = createMove(PROMOTE_TO_BISHOP, 0,
-                                                      MOVE_TYPE_PROMOTION, color, KNIGHTS, PAWNS, from,
-                                                      to);
-                        move_list[pos++] = createMove(PROMOTE_TO_KNIGHT, 0,
-                                                      MOVE_TYPE_PROMOTION, color, KNIGHTS, PAWNS, from,
-                                                      to);
+                        move_list[pos++] = createMove(PROMOTE_TO_QUEEN, 0, MOVE_PROMOTION, color, KNIGHTS, PAWNS, from, to);
+                        move_list[pos++] = createMove(PROMOTE_TO_ROOK, 0, MOVE_PROMOTION, color, KNIGHTS, PAWNS, from, to);
+                        move_list[pos++] = createMove(PROMOTE_TO_BISHOP, 0, MOVE_PROMOTION, color, KNIGHTS, PAWNS, from, to);
+                        move_list[pos++] = createMove(PROMOTE_TO_KNIGHT, 0, MOVE_PROMOTION, color, KNIGHTS, PAWNS, from, to);
                     }
                 }
             }
@@ -977,14 +899,10 @@ u8 genPromotions(u32 *move_list, u8 pos, u8 color) {
             to = bitScanForward(toPush);
             toPush &= toPush - 1;
             
-            move_list[pos++] = createMove(PROMOTE_TO_QUEEN, 0, MOVE_TYPE_PROMOTION,
-                                          color, DUMMY, PAWNS, from, to);
-            move_list[pos++] = createMove(PROMOTE_TO_ROOK, 0, MOVE_TYPE_PROMOTION,
-                                          color, DUMMY, PAWNS, from, to);
-            move_list[pos++] = createMove(PROMOTE_TO_BISHOP, 0, MOVE_TYPE_PROMOTION,
-                                          color, DUMMY, PAWNS, from, to);
-            move_list[pos++] = createMove(PROMOTE_TO_KNIGHT, 0, MOVE_TYPE_PROMOTION,
-                                          color, DUMMY, PAWNS, from, to);
+            move_list[pos++] = createMove(PROMOTE_TO_QUEEN, 0, MOVE_PROMOTION, color, DUMMY, PAWNS, from, to);
+            move_list[pos++] = createMove(PROMOTE_TO_ROOK, 0, MOVE_PROMOTION, color, DUMMY, PAWNS, from, to);
+            move_list[pos++] = createMove(PROMOTE_TO_BISHOP, 0, MOVE_PROMOTION, color, DUMMY, PAWNS, from, to);
+            move_list[pos++] = createMove(PROMOTE_TO_KNIGHT, 0, MOVE_PROMOTION, color, DUMMY, PAWNS, from, to);
         }
     }
     

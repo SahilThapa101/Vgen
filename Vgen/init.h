@@ -13,13 +13,13 @@
 
 void initZobristKeys() {
     
-    for(int i = WHITE; i <= BLACK; i++) {
-        // pawns = 1, so run loop from 0
-        for(int j = PAWNS - 1; j < KING; j++) {
-            
+    for(int j = 0; j < 6; j++) {
+    
+        for(int i = 0; i < 2; i++) {
+                
             for(int k = 0; k < 64; k++) {
                 
-                zobrist[i][j][k] = rand64();
+                zobrist[j][i][k] = rand64();
             }
         }
     }

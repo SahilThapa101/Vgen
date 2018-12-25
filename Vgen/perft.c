@@ -37,7 +37,7 @@ u64 perft(u8 depth, u8 color) {
         
         make_move(move_list[i]);
         
-        if (isSqAttacked(bitScanForward(pieceBB[sideToMove][KING]), sideToMove)) {
+        if (isKingInCheck(color)) {
             // illegal move
             if (move_type(move_list[i]) == 4) {
                 cas--;

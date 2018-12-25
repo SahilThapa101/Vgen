@@ -36,21 +36,19 @@ typedef unsigned long long int u64;
 #define WHITE 0
 #define BLACK 1
 
-#define MOVE_TYPE_PROMOTION 5
-
 #define PROMOTE_TO_QUEEN 0
 #define PROMOTE_TO_ROOK 1
 #define PROMOTE_TO_BISHOP 2
 #define PROMOTE_TO_KNIGHT 3
 
-u8 color;
+u8 sideToMove;
 
 u64 quiet, prevCap, cap, prevEp, ep, prevCas, cas, check, prom;
 
 /* pieceBB is an array containing bitboards for all pieces */
 
-#define MAX_PIECES 8
 #define MAX_SIDES 2
+#define MAX_PIECES 8
 #define MAX_SQUARES 64
 
 u64 pieceBB[2][MAX_PIECES]; /* color * (piece_type + pieces of that color) = 2 * 7 = 14 */
@@ -62,7 +60,8 @@ u64 pieceBB[2][MAX_PIECES]; /* color * (piece_type + pieces of that color) = 2 *
 u64 index_bb[INDEX_BB_SIZE];
 
 // zobrist keys
-u64 zobrist[MAX_PIECES][MAX_SIDES][MAX_SQUARES];
+// MAX_PIECES - 2, excluding DUMMY and ALL PIECES
+u64 zobrist[MAX_PIECES - 2][MAX_SIDES][MAX_SQUARES];
 
 u64 KEY_BLACK_TO_MOVE;
 int VAL_UNKNOWN;
@@ -74,7 +73,7 @@ int VAL_UNKNOWN;
 typedef struct tagHASHE {
     
     u64 key; // 8 bytes
-    //    u32 move; // 4 bytes
+    u32 move; // 4 bytes
     int value; // 2 bytes
     int depth; // 2 bytes
     int flags; // 2 bytes
@@ -140,6 +139,14 @@ u8 castling_rights[2];
 u64 occupied, empty;
 
 /* Extract data from a move structure */
+
+#define MOVE_NORMAL 0
+#define MOVE_CAPTURE 1
+#define MOVE_DOUBLE_PUSH 2
+#define MOVE_ENPASSANT 3
+#define MOVE_CASTLE 4
+#define MOVE_PROMOTION 5
+
 #define promType(move)           (move & 0x3000000) >> 24
 #define castleDir(move)        (move & 0xC00000) >> 22
 #define move_type(move)         (move & 0x380000) >> 19

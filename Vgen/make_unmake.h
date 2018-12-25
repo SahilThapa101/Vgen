@@ -14,4 +14,7 @@
 void make_move(u32 move);
 void unmake_move(u32 move);
 
+void QuiecenseMakeMove(u32 move);
+void QuiecenseUnMakeMove(u32 move);
+
 #endif /* make_unmake_h */

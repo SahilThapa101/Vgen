@@ -16,27 +16,24 @@ int evaluate(u8 color) {
     int whiteScore = 0;
     int blackScore = 0;
     
-    whiteScore = popCount(pieceBB[WHITE][KING]) * 200 +
-    popCount(pieceBB[WHITE][QUEEN]) * 9 +
-    popCount(pieceBB[WHITE][ROOKS]) * 5 +
-    popCount(pieceBB[WHITE][KNIGHTS]) * 3 +
-    popCount(pieceBB[WHITE][BISHOPS]) * 3 +
-    popCount(pieceBB[WHITE][PAWNS]) * 1;
+    whiteScore = popCount(pieceBB[WHITE][KING]) * 2000 +
+        popCount(pieceBB[WHITE][QUEEN]) * 900 +
+        popCount(pieceBB[WHITE][ROOKS]) * 500 +
+        popCount(pieceBB[WHITE][KNIGHTS]) * 300 +
+        popCount(pieceBB[WHITE][BISHOPS]) * 300 +
+        popCount(pieceBB[WHITE][PAWNS]) * 100;
     
-    blackScore = popCount(pieceBB[BLACK][KING]) * 200 +
-    popCount(pieceBB[BLACK][QUEEN]) * 9 +
-    popCount(pieceBB[BLACK][ROOKS]) * 5 +
-    popCount(pieceBB[BLACK][KNIGHTS]) * 3 +
-    popCount(pieceBB[BLACK][BISHOPS]) * 3 +
-    popCount(pieceBB[BLACK][PAWNS]) * 1;
+    blackScore = popCount(pieceBB[BLACK][KING]) * 2000 +
+        popCount(pieceBB[BLACK][QUEEN]) * 900 +
+        popCount(pieceBB[BLACK][ROOKS]) * 500 +
+        popCount(pieceBB[BLACK][KNIGHTS]) * 300 +
+        popCount(pieceBB[BLACK][BISHOPS]) * 300 +
+        popCount(pieceBB[BLACK][PAWNS]) * 100;
     
-    int result = whiteScore - blackScore; //+ 0.1 * (getMobility(WHITE) - getMobility(BLACK));
-    
-    if ( color == BLACK ) {
-        result = -result;
-    }
-    
-    return result;
+    int materialAdvantage  = color ? (blackScore - whiteScore) : (whiteScore - blackScore);
+    //int mobilityScore = 0.1 * color ? (getMobility(BLACK) - getMobility(WHITE)) : (getMobility(WHITE) - getMobility(BLACK));
+
+    return materialAdvantage;// + mobilityScore;
 }
 
 u8 getMobility(u8 color) {

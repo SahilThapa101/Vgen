@@ -22,9 +22,9 @@ typedef struct tagLINE {
 void search(u8 color);
 
 // for alphabeta
-int alphabeta(int color, int depth, int alpha, int beta, int mate, LINE *pline);
+int alphabeta(u8 color, int depth, int alpha, int beta, int mate, LINE *pline);
 
-int Quies(int color, int alpha, int beta);
+int Quiescense(u8 color, int alpha, int beta);
 
 void MVV_LVA(u32 *moveList, u32 numberOfMoves);
 
@@ -32,8 +32,16 @@ void sortByLVA(u32 *moveList, int numberOfMoves);
 
 u64 getZobristKeyForPosition(void);
 
-int ProbeHash(int color, int depth, int alpha, int beta);
+int ProbeHash(u8 color, int depth, int alpha, int beta, u32 *bestMove);
 
-void RecordHash(int color, int depth, int val, int hashf);
+void RecordHash(u8 color, int depth, int val, int hashf, u32 bestMove);
+
+int sortByBestMoveFound(u32 *moveList, int count, u32 bestMove);
+
+int NegaMax(u8 color, int depth, int alpha, int beta, LINE *pline);
+
+int NextGuess(int alpha, int beta, u8 subtreeCount);
+
+u32 BNS(u8 color, int depth, int alpha, int beta, LINE *pline);
 
 #endif /* search_h */
