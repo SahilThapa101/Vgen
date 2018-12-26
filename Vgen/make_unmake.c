@@ -9,7 +9,6 @@
 #include <stdbool.h>
 #include "make_unmake.h"
 #include "utility.h"
-#include "globals.h"
 
 void make_move(u32 move) {
     
@@ -25,7 +24,8 @@ void make_move(u32 move) {
     
     piece = pieceType(move);
     c_piece = cPieceType(move);
-    sideToMove = colorType(move);
+    
+    u8 sideToMove = colorType(move);
     
     moveStack[ply].epFlag = 0;
     moveStack[ply].prevCastleFlags = moveStack[ply].castleFlags;
@@ -306,7 +306,7 @@ void make_move(u32 move) {
 }
 
 void unmake_move(u32 move) {
-    u64 from_bb, to_bb, from_to_bb, piece, c_piece, color;
+    u64 from_bb, to_bb, from_to_bb, piece, c_piece;
     
     u8 castleDirection = castleDir(move);
     
@@ -317,7 +317,8 @@ void unmake_move(u32 move) {
     
     piece = pieceType(move);
     c_piece = cPieceType(move);
-    color = colorType(move);
+    
+    u8 sideToMove = colorType(move);
     
     moveStack[ply].castleFlags = moveStack[ply].prevCastleFlags;
     
@@ -325,8 +326,8 @@ void unmake_move(u32 move) {
             
         case MOVE_NORMAL:
             
-            pieceBB[color][piece] ^= from_to_bb;
-            pieceBB[color][PIECES] ^= from_to_bb;
+            pieceBB[sideToMove][piece] ^= from_to_bb;
+            pieceBB[sideToMove][PIECES] ^= from_to_bb;
             
             occupied ^= from_to_bb;
             empty ^= from_to_bb;
@@ -334,11 +335,11 @@ void unmake_move(u32 move) {
             break;
         case MOVE_CAPTURE:
             
-            pieceBB[color][piece] ^= from_to_bb;
-            pieceBB[color][PIECES] ^= from_to_bb;
+            pieceBB[sideToMove][piece] ^= from_to_bb;
+            pieceBB[sideToMove][PIECES] ^= from_to_bb;
             
-            pieceBB[color ^ 1][c_piece] ^= to_bb;
-            pieceBB[color ^ 1][PIECES] ^= to_bb;
+            pieceBB[sideToMove ^ 1][c_piece] ^= to_bb;
+            pieceBB[sideToMove ^ 1][PIECES] ^= to_bb;
             
             occupied ^= from_bb;
             empty ^= from_bb;
@@ -346,8 +347,8 @@ void unmake_move(u32 move) {
             break;
         case MOVE_DOUBLE_PUSH:
             
-            pieceBB[color][piece] ^= from_to_bb;
-            pieceBB[color][PIECES] ^= from_to_bb;
+            pieceBB[sideToMove][piece] ^= from_to_bb;
+            pieceBB[sideToMove][PIECES] ^= from_to_bb;
             
             occupied ^= from_to_bb;
             empty ^= from_to_bb;
@@ -356,10 +357,10 @@ void unmake_move(u32 move) {
             
         case MOVE_ENPASSANT:
             
-            pieceBB[color][PAWNS] ^= from_to_bb;
-            pieceBB[color][PIECES] ^= from_to_bb;
+            pieceBB[sideToMove][PAWNS] ^= from_to_bb;
+            pieceBB[sideToMove][PIECES] ^= from_to_bb;
             
-            if (color == WHITE) {
+            if (sideToMove == WHITE) {
                 
                 pieceBB[BLACK][PAWNS] ^= (to_bb >> 8);
                 pieceBB[BLACK][PIECES] ^= (to_bb >> 8);
@@ -444,13 +445,13 @@ void unmake_move(u32 move) {
                     
                 case PROMOTE_TO_QUEEN:
                     
-                    pieceBB[color][PAWNS] ^= from_bb;
-                    pieceBB[color][QUEEN] ^= to_bb;
-                    pieceBB[color][PIECES] ^= from_to_bb;
+                    pieceBB[sideToMove][PAWNS] ^= from_bb;
+                    pieceBB[sideToMove][QUEEN] ^= to_bb;
+                    pieceBB[sideToMove][PIECES] ^= from_to_bb;
                     
                     if (c_piece != DUMMY) {
-                        pieceBB[color ^ 1][c_piece] ^= to_bb;
-                        pieceBB[color ^ 1][PIECES] ^= to_bb;
+                        pieceBB[sideToMove ^ 1][c_piece] ^= to_bb;
+                        pieceBB[sideToMove ^ 1][PIECES] ^= to_bb;
                         
                         occupied ^= from_bb;
                         empty ^= from_bb;
@@ -461,13 +462,13 @@ void unmake_move(u32 move) {
                     
                     break;
                 case PROMOTE_TO_ROOK:
-                    pieceBB[color][PAWNS] ^= from_bb;
-                    pieceBB[color][ROOKS] ^= to_bb;
-                    pieceBB[color][PIECES] ^= from_to_bb;
+                    pieceBB[sideToMove][PAWNS] ^= from_bb;
+                    pieceBB[sideToMove][ROOKS] ^= to_bb;
+                    pieceBB[sideToMove][PIECES] ^= from_to_bb;
                     
                     if (c_piece != DUMMY) {
-                        pieceBB[color ^ 1][c_piece] ^= to_bb;
-                        pieceBB[color ^ 1][PIECES] ^= to_bb;
+                        pieceBB[sideToMove ^ 1][c_piece] ^= to_bb;
+                        pieceBB[sideToMove ^ 1][PIECES] ^= to_bb;
                         
                         occupied ^= from_bb;
                         empty ^= from_bb;
@@ -479,13 +480,13 @@ void unmake_move(u32 move) {
                     
                     break;
                 case PROMOTE_TO_KNIGHT:
-                    pieceBB[color][PAWNS] ^= from_bb;
-                    pieceBB[color][KNIGHTS] ^= to_bb;
-                    pieceBB[color][PIECES] ^= from_to_bb;
+                    pieceBB[sideToMove][PAWNS] ^= from_bb;
+                    pieceBB[sideToMove][KNIGHTS] ^= to_bb;
+                    pieceBB[sideToMove][PIECES] ^= from_to_bb;
                     
                     if (c_piece != DUMMY) {
-                        pieceBB[color ^ 1][c_piece] ^= to_bb;
-                        pieceBB[color ^ 1][PIECES] ^= to_bb;
+                        pieceBB[sideToMove ^ 1][c_piece] ^= to_bb;
+                        pieceBB[sideToMove ^ 1][PIECES] ^= to_bb;
                         
                         occupied ^= from_bb;
                         empty ^= from_bb;
@@ -498,13 +499,13 @@ void unmake_move(u32 move) {
                     break;
                     
                 case PROMOTE_TO_BISHOP:
-                    pieceBB[color][PAWNS] ^= from_bb;
-                    pieceBB[color][BISHOPS] ^= to_bb;
-                    pieceBB[color][PIECES] ^= from_to_bb;
+                    pieceBB[sideToMove][PAWNS] ^= from_bb;
+                    pieceBB[sideToMove][BISHOPS] ^= to_bb;
+                    pieceBB[sideToMove][PIECES] ^= from_to_bb;
                     
                     if (c_piece != DUMMY) {
-                        pieceBB[color ^ 1][c_piece] ^= to_bb;
-                        pieceBB[color ^ 1][PIECES] ^= to_bb;
+                        pieceBB[sideToMove ^ 1][c_piece] ^= to_bb;
+                        pieceBB[sideToMove ^ 1][PIECES] ^= to_bb;
                         
                         occupied ^= from_bb;
                         empty ^= from_bb;
@@ -532,7 +533,7 @@ void QuiecenseMakeMove(u32 move) {
     
     piece = pieceType(move);
     c_piece = cPieceType(move);
-    sideToMove = colorType(move);
+    u8 sideToMove = colorType(move);
     
     pieceBB[sideToMove][piece] ^= from_to_bb;
     pieceBB[sideToMove][PIECES] ^= from_to_bb;
@@ -554,7 +555,7 @@ void QuiecenseUnMakeMove(u32 move) {
     
     piece = pieceType(move);
     c_piece = cPieceType(move);
-    sideToMove = colorType(move);
+    u8 sideToMove = colorType(move);
     
     pieceBB[sideToMove][piece] ^= from_to_bb;
     pieceBB[sideToMove][PIECES] ^= from_to_bb;

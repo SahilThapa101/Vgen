@@ -35,4 +35,6 @@ u64 rand64(void);
 
 void clearAllBitBoards(void);
 
+void checkUp(void);
+
 #endif /* utility_h */

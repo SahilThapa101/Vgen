@@ -19,6 +19,7 @@
 		4E31CD1621D26612008005CD /* uci.c in Sources */ = {isa = PBXBuildFile; fileRef = 4E31CD1521D26612008005CD /* uci.c */; };
 		4E31CD1921D26FD6008005CD /* fen.c in Sources */ = {isa = PBXBuildFile; fileRef = 4E31CD1821D26FD6008005CD /* fen.c */; };
 		4EAE2F4E21CEEACA00B731D3 /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = 4EAE2F4D21CEEACA00B731D3 /* main.c */; };
+		4EE672D021D364CE001786DC /* vtime.c in Sources */ = {isa = PBXBuildFile; fileRef = 4EE672CF21D364CE001786DC /* vtime.c */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -61,6 +62,8 @@
 		4E31CD1821D26FD6008005CD /* fen.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = fen.c; sourceTree = "<group>"; };
 		4EAE2F4A21CEEACA00B731D3 /* Vgen */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = Vgen; sourceTree = BUILT_PRODUCTS_DIR; };
 		4EAE2F4D21CEEACA00B731D3 /* main.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = main.c; sourceTree = "<group>"; };
+		4EE672CE21D364CE001786DC /* vtime.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = vtime.h; sourceTree = "<group>"; };
+		4EE672CF21D364CE001786DC /* vtime.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = vtime.c; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -119,6 +122,8 @@
 				4E31CD1521D26612008005CD /* uci.c */,
 				4E31CD1721D26FD6008005CD /* fen.h */,
 				4E31CD1821D26FD6008005CD /* fen.c */,
+				4EE672CE21D364CE001786DC /* vtime.h */,
+				4EE672CF21D364CE001786DC /* vtime.c */,
 			);
 			path = Vgen;
 			sourceTree = "<group>";
@@ -182,6 +187,7 @@
 				4E31CD1621D26612008005CD /* uci.c in Sources */,
 				4E1DBAD821CF81F000ECA2F8 /* utility.c in Sources */,
 				4E1DBAC521CF7F7200ECA2F8 /* magicmoves.c in Sources */,
+				4EE672D021D364CE001786DC /* vtime.c in Sources */,
 				4E31CD1921D26FD6008005CD /* fen.c in Sources */,
 				4E1DBAD121CF815000ECA2F8 /* perft.c in Sources */,
 				4EAE2F4E21CEEACA00B731D3 /* main.c in Sources */,

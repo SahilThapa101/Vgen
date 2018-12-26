@@ -10,6 +10,8 @@
 #define fen_h
 
 #include <stdio.h>
+#include "globals.h"
+
 typedef void (*split_fn)(const char *, size_t, void *);
 void initFEN(const char *str, size_t len, void *data);
 void readFEN(char* FEN, int len);

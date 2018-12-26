@@ -31,7 +31,6 @@ void init_knight_attacks(void);
 
 // https://chessprogramming.wikispaces.com/Pawn+Pushes+%28Bitboards%29
 
-
 u64 wSinglePushTargets(u64 wpawns, u64 empty);
 u64 wDblPushTargets(u64 wpawns, u64 empty);
 

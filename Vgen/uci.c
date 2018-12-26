@@ -15,6 +15,8 @@
 #include "make_unmake.h"
 #include "fen.h"
 #include "movegen.h"
+#include "vtime.h"
+#include "search.h"
 
 #define INPUTBUFFER 400 * 6
 #define NAME "Vgen"
@@ -309,9 +311,10 @@ void parsePosition(char* lineIn) {
     
     ptrChar = strstr(lineIn, "moves");
 
-    const u8 COLOR = sideToMove;
+    const u8 COLOR = color;
     u8 SIDE_TO_MOVE = COLOR;
     
+    int count = 0;
     if(ptrChar != NULL) {
 
         ptrChar += 6;
@@ -324,6 +327,7 @@ void parsePosition(char* lineIn) {
                 break;
             }
 
+            count++;
             make_move(move);
             ply = 0;
             
@@ -335,16 +339,101 @@ void parsePosition(char* lineIn) {
             SIDE_TO_MOVE ^= 1;
         }
     }
-
+    
+    if(color) {
+        if(count % 2 == 0) {
+            color = BLACK;
+        } else {
+            color = WHITE;
+        }
+    } else {
+        if(count % 2 == 0) {
+            color = WHITE;
+        } else {
+            color = BLACK;
+        }
+    }
+    
     print_board(occupied);
 }
 
-void parseGo(char *lineIn) {
+void parseGo(char *lineIn, u8 sideToMove) {
     
+    int depthCurrent = -1;
+    int movesToGo = 30;
+    int moveTime = -1;
+    int time = -1;
+    int inc = 0;
+    
+    char * ptr = NULL;
+    
+    if((ptr = strstr(lineIn, "infinite"))) {
+        
+    }
+    
+    if((ptr = strstr(lineIn, "binc")) && sideToMove == BLACK) {
+        
+        inc = atoi(ptr + 5);
+    }
+    
+    if((ptr = strstr(lineIn, "winc")) && sideToMove == WHITE) {
+        
+        inc = atoi(ptr + 5);
+    }
+    
+    if((ptr = strstr(lineIn, "btime")) && sideToMove == BLACK) {
+        
+        time = atoi(ptr + 6);
+    }
+
+    if((ptr = strstr(lineIn, "wtime")) && sideToMove == WHITE) {
+        
+        time = atoi(ptr + 6);
+    }
+
+    if((ptr = strstr(lineIn, "movestogo"))) {
+        
+        movesToGo = atoi(ptr + 10);
+    }
+    
+    if((ptr =  strstr(lineIn, "movetime"))) {
+        
+        moveTime = atoi(ptr + 9);
+    }
+
+    if((ptr = strstr(lineIn, "depth"))) {
+        
+        depthCurrent = atoi(ptr + 6);
+    }
+    
+    if(moveTime != -1) {
+        time = moveTime;
+        movesToGo = 1;
+    }
+    
+    startTime = getTimeMs();
+    depth = depthCurrent;
+    
+    if(time != -1) {
+        
+        timeSet = true;
+        time /= movesToGo;
+        time -= 50;
+        stopTime = startTime + time + inc;
+    }
+    
+    if(depth == -1) {
+        depth = MAX_DEPTH;
+    }
+    
+    printf("time:%d start:%llu stop:%llu depth:%d timeset:%d\n", time, startTime, stopTime, depth, timeSet);
+    
+    search(color);
 }
 
-bool quit = false;
 void UciLoop() {
+    
+    quit = false;
     
     setbuf(stdin, NULL);
     setbuf(stdout, NULL);
@@ -374,7 +463,7 @@ void UciLoop() {
         } else if(!strncmp(line, "ucinewgame", 10)) {
             parsePosition("position startpos\n");
         } else if(!strncmp(line, "go", 2)) {
-            parseGo(line);
+            parseGo(line, color);
         } else if(!strncmp(line, "quit", 4)) {
           
             quit = true;

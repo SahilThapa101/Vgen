@@ -52,6 +52,9 @@ int main(int argc, char **argv) {
     initCastleMaskAndFlags();
     initZobristKeys();
     
+    timeSet = false;
+    stopped = false;
+    
     UciLoop();
     
 //    char* arg1 = argv[1];
@@ -169,10 +172,8 @@ void startPerft(u8 side, u8 depth) {
         cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
         nps = (double) (nodes / (cpu_time_used * 1000000));
         printf("Depth(%d)=   ", i);
-        printf(
-               "%10llu (%8.3f sec), color - %s, captures - %8llu, en - %6llu, cas - %6llu, prom - %8llu, %7.3f MN/s\n",
-               nodes, cpu_time_used, ((side == 0) ? "WHITE" : "BLACK"), cap,
-               ep, cas, prom, nps);
+        printf("%10llu (%8.3f sec), color - %s, captures - %8llu, en - %6llu, cas - %6llu, prom - %8llu, %7.3f MN/s\n",
+               nodes, cpu_time_used, ((side == 0) ? "WHITE" : "BLACK"), cap, ep, cas, prom, nps);
         
         prevCap = cap;
         prevEp = ep;

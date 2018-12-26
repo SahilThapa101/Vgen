@@ -11,7 +11,6 @@
 
 #include "fen.h"
 #include "dynarray.h"
-#include "globals.h"
 #include "utility.h"
 
 void clearAllBitBoards() {
@@ -125,7 +124,7 @@ void splitTheFEN() {
     
     // set global variable color
     
-    sideToMove = COLOR;
+    color = COLOR;
     
     char* checkCastleFlags = ((char*) (d_array->buffer[2]));
     

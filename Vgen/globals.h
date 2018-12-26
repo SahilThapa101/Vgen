@@ -31,7 +31,7 @@ typedef unsigned long long int u64;
 #define C64(constantU64) constantU64
 
 #define MAX_MOVES 256
-#define MAX_DEPTH 2
+#define MAX_DEPTH 100
 
 #define WHITE 0
 #define BLACK 1
@@ -41,9 +41,11 @@ typedef unsigned long long int u64;
 #define PROMOTE_TO_BISHOP 2
 #define PROMOTE_TO_KNIGHT 3
 
-u8 sideToMove;
-
 u64 quiet, prevCap, cap, prevEp, ep, prevCas, cas, check, prom;
+
+u8 color;
+int depth;
+u64 nodes;
 
 /* pieceBB is an array containing bitboards for all pieces */
 
@@ -171,5 +173,15 @@ u64 occupied, empty;
 
 #define NOT_A_FILE 0XFEFEFEFEFEFEFEFEU
 #define NOT_H_FILE 0X7F7F7F7F7F7F7F7FU
+
+// uci
+bool quit;
+
+// for time management
+bool timeSet;
+bool stopped;
+
+u64 startTime;
+u64 stopTime;
 
 #endif /* globals_h */

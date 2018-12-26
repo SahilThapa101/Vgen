@@ -17,6 +17,7 @@
 #include "make_unmake.h"
 #include "movegen.h"
 #include "perft.h"
+#include "vtime.h"
 
 u64 rand64() {
     
@@ -690,5 +691,15 @@ int divide(u8 depth, u8 color) {
     
     printf("Total nodes -> %llu\n", total_nodes);
     return 0;
+}
+
+void checkUp() {
+    
+    if(timeSet && getTimeMs() > stopTime) {
+        
+        stopped = true;
+    }
+    
+    readInput();
 }
 

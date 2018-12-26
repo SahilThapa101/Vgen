@@ -12,10 +12,10 @@
 
 #include "search.h"
 #include "evaluate.h"
-#include "globals.h"
 #include "movegen.h"
 #include "make_unmake.h"
 #include "utility.h"
+#include "vtime.h"
 
 const int INFINITY = 30000;
 
@@ -44,52 +44,122 @@ u64 getZobristKeyForPosition() {
     return key;
 }
 
-void search(u8 color) {
+void search(u8 sideToMove) {
 
-    clock_t start, end;
-    double cpu_time_used;
     const int MATE = 5000;
     u32 move;
-    const u8 COLOR = color;
-    LINE mainline;
-
-    start = clock();
-    for(int i = 1; ; i++) {
-        ply = 0;
+    u32 bestMove = 0;
+    const u8 COLOR = sideToMove;
     
+    for(int i = 1; i < depth; i++) {
+        ply = 0;
+        nodes = 0;
+    
+        LINE mainline;
+
         //int score = alphabeta(COLOR, i, -INFINITY, INFINITY, MATE, &mainline);
         int score = NegaMax(COLOR, i, -INFINITY, INFINITY, &mainline);
-        
-        //     printf("Mate in %d\n", (MATE - score + 1) / 2);
-        // } else if(score <= -MATE + 1000) {
-        
-        //     printf("Mated in %d\n", (MATE + score) / 2);
-        // }
-        end = clock();
-
-        cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
-
-        int numberOfMoves = mainline.cmove;
-
-        printf("\n%d) ", i);
-        for (int j = 0; j < numberOfMoves; j++) {
-
-            move = mainline.argmove[j];
-
-            printf("%c%s-%s ", pieceName[colorType(move)][pieceType(move)],
-                   algebricPos(from_sq(move)), algebricPos(to_sq(move)));
+    
+        if(stopped) {
+            break;
         }
 
-        printf(" %d %fs", score, cpu_time_used);
+        bestMove = mainline.argmove[0];
+       
+        printf("info score cp %d depth %d nodes %llu time %llu ", score, i, nodes, (getTimeMs() - startTime));
+        printf("pv");
+        
+        int numberOfMoves = mainline.cmove;
+        for (int j = 0; j < numberOfMoves; j++) {
+
+            char ch;
+            char *str;
+            str = malloc(sizeof(char));
+            str[0] = '\0';
+            
+            move = mainline.argmove[j];
+            
+            ch = pieceName[colorType(move)][pieceType(move)];
+            
+            if(ch != (char) 0) {
+                str[0] = ch;
+            }
+        
+            strcat(str, algebricPos(from_sq(move)));
+            strcat(str, algebricPos(to_sq(move)));
+
+            if(move_type(move) == MOVE_PROMOTION) {
+                switch (promType(move)) {
+                    case PROMOTE_TO_ROOK:
+                        color ? strcat(str, "r") : strcat(str, "R");
+                        break;
+                    case PROMOTE_TO_BISHOP:
+                        color ? strcat(str, "b") : strcat(str, "B");
+                        break;
+                    case PROMOTE_TO_KNIGHT:
+                        color ? strcat(str, "n") : strcat(str, "N");
+                        break;
+                    default:
+                        color ? strcat(str, "q") : strcat(str, "Q");
+                        break;
+                }
+            }
+            
+            printf(" %s", str);
+        }
+        
+        printf("\n");
     }
+    
+    char ch;
+    char *str;
+    str = malloc(sizeof(char));
+    str[0] = '\0';
+    
+    ch = pieceName[colorType(bestMove)][pieceType(bestMove)];
+    
+    if(ch != (char) 0) {
+        str[0] = ch;
+    }
+    
+    strcat(str, algebricPos(from_sq(bestMove)));
+    strcat(str, algebricPos(to_sq(bestMove)));
+    
+    if(move_type(bestMove) == MOVE_PROMOTION) {
+        switch (promType(bestMove)) {
+            case PROMOTE_TO_ROOK:
+                color ? strcat(str, "r") : strcat(str, "R");
+                break;
+            case PROMOTE_TO_BISHOP:
+                color ? strcat(str, "b") : strcat(str, "B");
+                break;
+            case PROMOTE_TO_KNIGHT:
+                color ? strcat(str, "n") : strcat(str, "N");
+                break;
+            default:
+                color ? strcat(str, "q") : strcat(str, "Q");
+                break;
+        }
+    }
+
+    printf("bestmove %s\n", str);
+    
+    timeSet = false;
+    stopped = false;
 }
 
 int NegaMax(u8 color, int depth, int alpha, int beta, LINE *pline) {
 
     if(depth <= 0) {
         pline->cmove = 0;
-        return evaluate(color);
+        return Quiescense(color, alpha, beta);
     }
+    
+    if((nodes & 2047) == 0) {
+        checkUp();
+    }
+    
+    nodes++;
     
     ply++;
     moveStack[ply].epFlag = moveStack[ply - 1].epFlag;
@@ -114,6 +184,10 @@ int NegaMax(u8 color, int depth, int alpha, int beta, LINE *pline) {
             int val = -NegaMax(color ^ 1, depth - 1, -beta, -alpha, &line);
             unmake_move(moveList[i]);
             
+            if(stopped) {
+                return 0;
+            }
+            
             if(val >= beta) {
                 ply--;
                 
@@ -129,6 +203,10 @@ int NegaMax(u8 color, int depth, int alpha, int beta, LINE *pline) {
             }
         } else {
             unmake_move(moveList[i]);
+            
+            if(stopped) {
+                return 0;
+            }
         }
     }
     
@@ -172,6 +250,12 @@ int alphabeta(u8 color, int depth, int alpha, int beta, int mate, LINE *pline) {
         
         return score;
     }
+    
+    if((nodes & 2047) == 0) {
+        checkUp();
+    }
+    
+    nodes++;
     
     ply++;
     moveStack[ply].epFlag = moveStack[ply - 1].epFlag;
@@ -218,6 +302,10 @@ int alphabeta(u8 color, int depth, int alpha, int beta, int mate, LINE *pline) {
             
             unmake_move(moveList[i]);
             
+            if(stopped) {
+                return 0;
+            }
+            
             if (val >= beta) {
                 
                 RecordHash(color, depth, beta, hashfBETA, bestMove);
@@ -242,6 +330,10 @@ int alphabeta(u8 color, int depth, int alpha, int beta, int mate, LINE *pline) {
             
         } else {
             unmake_move(moveList[i]);
+            
+            if(stopped) {
+                return 0;
+            }
         }
     }
     
@@ -269,7 +361,13 @@ int Quiescense(u8 color, int alpha, int beta) {
 //    if(isKingInCheck(color)) {
 //        return alphabeta(color ^ 1, 1, alpha, beta, mate, pline);
 //    }
+  
+    if((nodes & 2047) == 0) {
+        checkUp();
+    }
     
+    nodes++;
+   
     int standingPat = evaluate(color);
     
     if (standingPat >= beta) {
@@ -313,6 +411,10 @@ int Quiescense(u8 color, int alpha, int beta) {
             
             unmake_move(moveList[i]);
             
+            if(stopped) {
+                return 0;
+            }
+            
             if (score >= beta) {
                 ply--;
                 return beta;
@@ -323,6 +425,10 @@ int Quiescense(u8 color, int alpha, int beta) {
             }
         } else {
             unmake_move(moveList[i]);
+            
+            if(stopped) {
+                return 0;
+            }
         }
     }
     ply--;
