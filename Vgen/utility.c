@@ -703,3 +703,32 @@ void checkUp() {
     readInput();
 }
 
+void clearHashTable() {
+	
+	for(int i = 0; i < HASH_TABLE_SIZE; i++) {
+		
+		hashTable[i].key = 0ULL;
+		hashTable[i].move = 0UL;
+		hashTable[i].value = 0;
+		hashTable[i].depth = -1;
+		hashTable[i].flags = -1;
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

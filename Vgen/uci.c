@@ -65,7 +65,6 @@ u32 parseMove(char *ptrChar, u8 sideToMove) {
     u8 toRank;
     u64 fromBB;
     u64 toBB;
-    
     char fromFile;
     char toFile;
     int piece = -1;
@@ -83,6 +82,23 @@ u32 parseMove(char *ptrChar, u8 sideToMove) {
     toSq = (toRank * 8) + addFileNumber(toFile);
     toBB = getBitboardFromSquare(toSq);
     
+	u32 moveList[MAX_MOVES];
+	
+	u8 moveCount = genMoves(moveList, sideToMove);
+	
+	for(int i = 0; i < moveCount; i++) {
+		
+		int fromSquare = from_sq(moveList[i]);
+		int toSquare = to_sq(moveList[i]);
+		
+		if(fromSquare == fromSq && toSquare == toSq) {
+			
+			return moveList[i];
+		}	
+	}		
+	
+	
+	/* 
     if(fromBB & pieceBB[sideToMove][PAWNS]) {
        
         piece = PAWNS;
@@ -102,10 +118,43 @@ u32 parseMove(char *ptrChar, u8 sideToMove) {
         
         piece = KING;
     }
-    
+	
     if(piece == -1) {
         return 0;
     }
+	
+	if(piece == KING) {
+	  // check for castling
+		if(fromSq < 8 || fromSq > 55) {
+            
+			if(toSq < 8) {
+                ptrChar--;
+                // white castles
+				if(*ptrChar == 'g') {
+                    // white short castling
+				
+					return createMove(0, WHITE_CASTLE_KING_SIDE, MOVE_CASTLE, WHITE, ROOKS, KING, 4, 6);
+				} else {
+                    
+					return createMove(0, WHITE_CASTLE_QUEEN_SIDE, MOVE_CASTLE, WHITE, ROOKS, KING, 4, 2);
+				}
+			} else {
+                
+				// black castles
+				ptrChar--;
+				if(*ptrChar == 'g') {
+					
+                    // white short castling
+					return createMove(0, BLACK_CASTLE_KING_SIDE, MOVE_CASTLE, BLACK, ROOKS, KING, 60, 62);
+                    
+				} else {
+                    
+					return createMove(0, BLACK_CASTLE_QUEEN_SIDE, MOVE_CASTLE, BLACK, ROOKS, KING, 60, 58);
+				}
+			}
+		}
+	}
+    
     
     if(piece == PAWNS) {
         
@@ -123,7 +172,7 @@ u32 parseMove(char *ptrChar, u8 sideToMove) {
                         
                         return createMove(0, 0, MOVE_ENPASSANT, sideToMove, PAWNS, PAWNS, fromSq, toSq);
                     }
-                } else if(((fromSq % 7)  - (fromRank - 1)) == 0) {
+                } else if(((fromSq % 7)  - fromRank) == 0) {
                     // H - file pawns
                     
                     if(fromBB & pieceBB[sideToMove ^ 1][PAWNS]) {
@@ -142,38 +191,8 @@ u32 parseMove(char *ptrChar, u8 sideToMove) {
                 }
             }
         }
-        
-        // check for castling
-        if(fromSq < 8 || fromSq > 55) {
-            
-            if(toSq < 8) {
-                
-                // white castles
-                ptrChar--;
-                if(*ptrChar == 'g') {
-                    // white short castling
-                    return createMove(0, WHITE_CASTLE_KING_SIDE, MOVE_CASTLE, sideToMove, ROOKS, KING, fromSq, toSq);
-                    
-                } else {
-                    
-                    return createMove(0, WHITE_CASTLE_QUEEN_SIDE, MOVE_CASTLE, sideToMove, ROOKS, KING, fromSq, toSq);
-                }
-            } else {
-                
-                // black castles
-                ptrChar--;
-                if(*ptrChar == 'g') {
-                    // white short castling
-                    return createMove(0, BLACK_CASTLE_KING_SIDE, MOVE_CASTLE, sideToMove, ROOKS, KING, fromSq, toSq);
-                    
-                } else {
-                    
-                    return createMove(0, BLACK_CASTLE_QUEEN_SIDE, MOVE_CASTLE, sideToMove, ROOKS, KING, fromSq, toSq);
-                }
-            }
-        }
     }
-    
+	
     if(piece == PAWNS) {
         if (toSq < 8 || toSq > 55) {
             
@@ -217,7 +236,7 @@ u32 parseMove(char *ptrChar, u8 sideToMove) {
                 
                 return createMove(promType, 0, MOVE_PROMOTION, sideToMove, DUMMY, PAWNS, fromSq, toSq);
             }
-        } else if(sideToMove? fromSq - 16 == toSq : fromSq + 16 == toSq) {
+        } else if(sideToMove ? ((fromSq - 16) == toSq) : ((fromSq + 16) == toSq)) {
             return createMove(0, 0, MOVE_DOUBLE_PUSH, sideToMove, DUMMY, PAWNS, fromSq, toSq);
         } else if(toBB & pieceBB[sideToMove ^ 1][PIECES]) {
             
@@ -242,9 +261,9 @@ u32 parseMove(char *ptrChar, u8 sideToMove) {
         }
     } else {
     
-        if(toBB & occupied) {
+		if(toBB & pieceBB[sideToMove ^ 1][PIECES]) {
             
-            if(toBB & pieceBB[sideToMove ^ 1][PAWNS]) {
+			if(toBB & pieceBB[sideToMove ^ 1][PAWNS]) {
                 
                 return createMove(0, 0, MOVE_CAPTURE, sideToMove, PAWNS, piece, fromSq, toSq);
             } else if(toBB & pieceBB[sideToMove ^ 1][KNIGHTS]) {
@@ -264,7 +283,7 @@ u32 parseMove(char *ptrChar, u8 sideToMove) {
         
             return createMove(0, 0, MOVE_NORMAL, sideToMove, DUMMY, piece, fromSq, toSq);
         }
-    }
+    } */
     
     return 0;
 }
@@ -290,13 +309,12 @@ void parsePosition(char* lineIn) {
     
     ptrChar = strstr(lineIn, "moves");
 
-    u8 SIDE_TO_MOVE = color;
-    
     int count = 0;
-    u32 lastMove = 0;
     if(ptrChar != NULL) {
 
-        ptrChar += 6;
+		u8 SIDE_TO_MOVE = WHITE;
+        
+		ptrChar += 6;
         while(*ptrChar) {
             // parse Move
             
@@ -308,7 +326,6 @@ void parsePosition(char* lineIn) {
 
             count++;
             make_move(move);
-            lastMove = move;
             ply = 0;
             
             while(*ptrChar && *ptrChar != ' ') {
@@ -318,16 +335,20 @@ void parsePosition(char* lineIn) {
             ptrChar++;
             SIDE_TO_MOVE ^= 1;
         }
-    }
-    
-    if(count == 0) {
-        color = WHITE;
-    } else if(colorType(lastMove) == BLACK) {
-        color = WHITE;
     } else {
-        color = BLACK;
-    }
-    
+		
+		// safe check if "moves" command is not present 
+		color = WHITE;
+	}
+	
+    printf("\nMove count - %d\n", count);
+	
+	if(count % 2 == 0) {
+		color = WHITE;
+	} else {
+		color = BLACK;
+	}
+	
     print_board(occupied);
 }
 
@@ -433,9 +454,21 @@ void UciLoop() {
             continue;
         } else if(!strncmp(line, "position", 8)) {
             color = WHITE;
-            parsePosition(line);
+            
+			moveStack[0].castleFlags = CastleFlagWhiteKing | CastleFlagWhiteQueen | CastleFlagBlackKing | CastleFlagBlackQueen;
+			moveStack[0].prevCastleFlags = moveStack[0].castleFlags;
+			moveStack[0].epFlag = 0;
+			ply = 0;
+			
+			parsePosition(line);
         } else if(!strncmp(line, "ucinewgame", 10)) {
             color = WHITE;
+			    
+			moveStack[0].castleFlags = CastleFlagWhiteKing | CastleFlagWhiteQueen | CastleFlagBlackKing | CastleFlagBlackQueen;
+			moveStack[0].prevCastleFlags = moveStack[0].castleFlags;
+			moveStack[0].epFlag = 0;
+			ply = 0;
+			
             parsePosition("position startpos\n");
         } else if(!strncmp(line, "go", 2)) {
             parseGo(line, color);

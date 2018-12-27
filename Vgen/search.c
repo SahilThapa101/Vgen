@@ -50,8 +50,10 @@ void search(u8 sideToMove) {
     u32 move;
     u32 bestMove = 0;
     const u8 COLOR = sideToMove;
-    
     nodes = 0;
+	
+	clearHashTable();
+	
     for(int i = 1; i < depth; i++) {
         ply = 0;
     
@@ -70,11 +72,12 @@ void search(u8 sideToMove) {
         printf("pv");
         
         int numberOfMoves = mainline.cmove;
+
+        char ch;
+        char *str;
+		str = malloc(sizeof(char) * 8);
         for (int j = 0; j < numberOfMoves; j++) {
 
-            char ch;
-            char *str;
-            str = malloc(sizeof(char));
             str[0] = '\0';
 
             move = mainline.argmove[j];
@@ -101,13 +104,15 @@ void search(u8 sideToMove) {
 
             printf(" %s", str);
         }
+		
+		free(str);
 
         printf("\n");
     }
 
     char ch;
     char *str;
-    str = malloc(sizeof(char));
+    str = malloc(sizeof(char) * 8);
     str[0] = '\0';
 
     strcat(str, algebricPos(from_sq(bestMove)));
@@ -132,6 +137,8 @@ void search(u8 sideToMove) {
 
     printf("bestmove %s\n", str);
     
+	free(str);
+	
     timeSet = false;
     stopped = false;
 }
@@ -232,7 +239,7 @@ int alphabeta(u8 color, int depth, int alpha, int beta, int mate, LINE *pline) {
         
         pline->cmove = 0;
         
-        int score = Quiescense(color, alpha, beta);
+        int score = evaluate(color);//Quiescense(color, alpha, beta);
         
         RecordHash(color, depth, score, hashfEXACT, bestMove);
         
@@ -253,12 +260,12 @@ int alphabeta(u8 color, int depth, int alpha, int beta, int mate, LINE *pline) {
     LINE line;
     
     int numberOfMoves;
-    u32 unSortedMoveList[MAX_MOVES];
+    u32 moveList[MAX_MOVES];
     
-    numberOfMoves = genMoves(unSortedMoveList, color);
-    
+    numberOfMoves = genMoves(moveList, color);
+	
+    /* 
     // sort by bestMove
-    
     int newCount = 0;
     u32 *moveList = NULL;
     u32 sortedMoveList[MAX_MOVES];
@@ -278,9 +285,10 @@ int alphabeta(u8 color, int depth, int alpha, int beta, int mate, LINE *pline) {
             newCount++;
         }
     }
-    
+     */
+	 
     int legalMoves = 0;
-    for (int i = 0; i < newCount; i++) {
+    for (int i = 0; i < numberOfMoves; i++) {
         
         make_move(moveList[i]);
         
@@ -331,7 +339,7 @@ int alphabeta(u8 color, int depth, int alpha, int beta, int mate, LINE *pline) {
         if (!isKingInCheck(color)) {
             // stalemate
             
-            alpha = color ? 10 : -10;
+            alpha = -10;
         } else {
             // checkmate
             
@@ -398,7 +406,7 @@ int Quiescense(u8 color, int alpha, int beta) {
             int score = -Quiescense(color ^ 1, -beta, -alpha);
             
             unmake_move(moveList[i]);
-            
+			
             if (score >= beta) {
                 ply--;
                 return beta;

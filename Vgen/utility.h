@@ -37,4 +37,6 @@ void clearAllBitBoards(void);
 
 void checkUp(void);
 
+void clearHashTable(void);
+
 #endif /* utility_h */
