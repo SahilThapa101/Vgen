@@ -56,6 +56,9 @@ int main(int argc, char **argv) {
     stopped = false;
     
     UciLoop();
+	
+	return 0 ;
+}
     
 //    char* arg1 = argv[1];
 //    u8 depth = 0;
@@ -129,55 +132,6 @@ int main(int argc, char **argv) {
 //        search(COLOR);
 //    }
     
-    return 0;
-}
-
-void startPerft(u8 side, u8 depth) {
-    
-    u64 nodes;
-    
-    clock_t start, end;
-    double cpu_time_used;
-    double nps;
-    
-    prevCap = 0;
-    prevEp = 0;
-    prevCas = 0;
-    
-    for (int i = 1; i <= depth; i++) {
-        
-        nodes = 0;
-        quiet = 0;
-        cap = 0;
-        ep = 0;
-        cas = 0;
-        check = 0;
-        ply = 0;
-        prom = 0;
-        
-        struct hist defaultHist = { 0, 0, 0, 0 };
-        
-        hist[ply] = defaultHist;
-        
-        start = clock();
-        
-        nodes = perft(i, side);
-        
-        end = clock();
-        
-        cap = cap - prevCap;
-        ep = ep - prevEp;
-        cas = cas - prevCas;
-        
-        cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
-        nps = (double) (nodes / (cpu_time_used * 1000000));
-        printf("Depth(%d)=   ", i);
-        printf("%10llu (%8.3f sec), color - %s, captures - %8llu, en - %6llu, cas - %6llu, prom - %8llu, %7.3f MN/s\n",
-               nodes, cpu_time_used, ((side == 0) ? "WHITE" : "BLACK"), cap, ep, cas, prom, nps);
-        
-        prevCap = cap;
-        prevEp = ep;
-        prevCas = cas;
-    }
-}
+ 
+ 
 

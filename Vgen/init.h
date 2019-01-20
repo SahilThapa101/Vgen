@@ -13,19 +13,34 @@
 
 void initZobristKeys() {
     
-    for(int j = 0; j < 6; j++) {
+    for(int i = 0; i < 2; i++) {
     
-        for(int i = 0; i < 2; i++) {
+        for(int j = 0; j < 8; j++) {
                 
             for(int k = 0; k < 64; k++) {
                 
-                zobrist[j][i][k] = rand64();
+				zobrist[i][j][k] = rand64();
             }
         }
     }
     
     KEY_BLACK_TO_MOVE = rand64();
-    VAL_UNKNOWN = rand();
+    	
+	KEY_FLAG_WHITE_CASTLE_QUEEN_SIDE = rand64();
+	KEY_FLAG_WHITE_CASTLE_KING_SIDE = rand64();
+	KEY_FLAG_BLACK_CASTLE_QUEEN_SIDE = rand64();
+	KEY_FLAG_BLACK_CASTLE_KING_SIDE = rand64(); 
+	
+	KEY_EP_A_FILE = rand64();
+	KEY_EP_B_FILE = rand64();
+	KEY_EP_C_FILE = rand64();
+	KEY_EP_D_FILE = rand64();
+	KEY_EP_E_FILE = rand64();
+	KEY_EP_F_FILE = rand64();
+	KEY_EP_G_FILE = rand64();
+	KEY_EP_H_FILE = rand64();
+	
+	VAL_UNKNOWN = rand();
 }
 
 void init_castling_rights() {

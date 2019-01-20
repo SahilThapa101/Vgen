@@ -17,7 +17,7 @@ void print_board(u64 board);
 
 int bitScanForward(u64 board);
 
-bool isKingInCheck(u8 color);
+bool isKingInCheck(u8 sideToMove);
 
 bool isSqAttacked(u8 sq, const u8 color);
 
@@ -38,5 +38,10 @@ void clearAllBitBoards(void);
 void checkUp(void);
 
 void clearHashTable(void);
+void clearRepetitionHashTable(void);
+void clearKillerMovesTable(void);
+void initHashKey(u8 sideToMove);
+void clearHistoryTable();
+void clearCounterMoveHistoryTable();
 
 #endif /* utility_h */

@@ -11,6 +11,8 @@
 
 #include "globals.h"
 
-int evaluate(u8 color);
-u8 getMobility(u8 color);
+int evaluate(u8 sideToMove);
+int getMobility(u8 sideToMove);
+int pSqTScore(u8 sideToMove);
+	
 #endif /* evaluate_h */

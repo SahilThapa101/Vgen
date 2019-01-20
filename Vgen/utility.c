@@ -125,24 +125,12 @@ int popCount (u64 x) {
     return (int) x;
 }
 
-bool isKingInCheck(u8 color) {
+bool isKingInCheck(u8 sideToMove) {
     
-    const u8 square = bitScanForward(pieceBB[color][KING]);
+    const u8 square = bitScanForward(pieceBB[sideToMove][KING]);
     
-    if(Bmagic(square, occupied) & pieceBB[color ^ 1][BISHOPS]) {
-        return true;
-    } else if(Qmagic(square, occupied) & pieceBB[color ^ 1][QUEEN]) {
-        return true;
-    } else if(Rmagic(square, occupied) & pieceBB[color ^ 1][ROOKS]) {
-        return true;
-    } else if (get_knight_attacks(square) & pieceBB[color ^ 1][KNIGHTS]) {
-        return true;
-    } else if(get_king_attacks(square) & pieceBB[color ^ 1][KING]) {
-        return true;
-    }
-    
-    // pawn attacks
-    if(color) {
+	// pawn attacks
+    if(sideToMove) {
         if((((index_bb[square] >> 7) & NOT_A_FILE) | ((index_bb[square] >> 9) & NOT_H_FILE))
            & pieceBB[WHITE][PAWNS]) {
             return true;
@@ -153,6 +141,18 @@ bool isKingInCheck(u8 color) {
             return true;
         }
     }
+    
+    if(Bmagic(square, occupied) & pieceBB[sideToMove ^ 1][BISHOPS]) {
+        return true;
+    } else if(Rmagic(square, occupied) & pieceBB[sideToMove ^ 1][ROOKS]) {
+        return true;
+    } else if(Qmagic(square, occupied) & pieceBB[sideToMove ^ 1][QUEEN]) {
+        return true;
+    } else if (get_knight_attacks(square) & pieceBB[sideToMove ^ 1][KNIGHTS]) {
+        return true;
+	} else if(get_king_attacks(square) & pieceBB[sideToMove ^ 1][KING]) {
+		return true;
+	}
     
     return false;
 }
@@ -215,138 +215,8 @@ bool isSqAttacked(u8 sq, u8 color) {
 }
 
 u64 getBitboardFromSquare(int sq) {
-    switch (sq) {
-        case 0:
-            return 0x0000000000000001U;
-        case 1:
-            return 0x0000000000000002U;
-        case 2:
-            return 0x0000000000000004U;
-        case 3:
-            return 0x0000000000000008U;
-        case 4:
-            return 0x0000000000000010U;
-        case 5:
-            return 0x0000000000000020U;
-        case 6:
-            return 0x0000000000000040U;
-        case 7:
-            return 0x0000000000000080U;
-        case 8:
-            return 0x0000000000000100U;
-        case 9:
-            return 0x0000000000000200U;
-        case 10:
-            return 0x0000000000000400U;
-        case 11:
-            return 0x0000000000000800U;
-        case 12:
-            return 0x0000000000001000U;
-        case 13:
-            return 0x0000000000002000U;
-        case 14:
-            return 0x0000000000004000U;
-        case 15:
-            return 0x0000000000008000U;
-        case 16:
-            return 0x0000000000010000U;
-        case 17:
-            return 0x0000000000020000U;
-        case 18:
-            return 0x0000000000040000U;
-        case 19:
-            return 0x0000000000080000U;
-        case 20:
-            return 0x0000000000100000U;
-        case 21:
-            return 0x0000000000200000U;
-        case 22:
-            return 0x0000000000400000U;
-        case 23:
-            return 0x0000000000800000U;
-        case 24:
-            return 0x0000000001000000U;
-        case 25:
-            return 0x0000000002000000U;
-        case 26:
-            return 0x0000000004000000U;
-        case 27:
-            return 0x0000000008000000U;
-        case 28:
-            return 0x0000000010000000U;
-        case 29:
-            return 0x0000000020000000U;
-        case 30:
-            return 0x0000000040000000U;
-        case 31:
-            return 0x0000000080000000U;
-        case 32:
-            return 0x0000000100000000U;
-        case 33:
-            return 0x0000000200000000U;
-        case 34:
-            return 0x0000000400000000U;
-        case 35:
-            return 0x0000000800000000U;
-        case 36:
-            return 0x0000001000000000U;
-        case 37:
-            return 0x0000002000000000U;
-        case 38:
-            return 0x0000004000000000U;
-        case 39:
-            return 0x0000008000000000U;
-        case 40:
-            return 0x0000010000000000U;
-        case 41:
-            return 0x0000020000000000U;
-        case 42:
-            return 0x0000040000000000U;
-        case 43:
-            return 0x0000080000000000U;
-        case 44:
-            return 0x0000100000000000U;
-        case 45:
-            return 0x0000200000000000U;
-        case 46:
-            return 0x0000400000000000U;
-        case 47:
-            return 0x0000800000000000U;
-        case 48:
-            return 0x0001000000000000U;
-        case 49:
-            return 0x0002000000000000U;
-        case 50:
-            return 0x0004000000000000U;
-        case 51:
-            return 0x0008000000000000U;
-        case 52:
-            return 0x0010000000000000U;
-        case 53:
-            return 0x0020000000000000U;
-        case 54:
-            return 0x0040000000000000U;
-        case 55:
-            return 0x0080000000000000U;
-        case 56:
-            return 0x0100000000000000U;
-        case 57:
-            return 0x0200000000000000U;
-        case 58:
-            return 0x0400000000000000U;
-        case 59:
-            return 0x0800000000000000U;
-        case 60:
-            return 0x1000000000000000U;
-        case 61:
-            return 0x2000000000000000U;
-        case 62:
-            return 0x4000000000000000U;
-        case 63:
-            return 0x8000000000000000U;
-    }
     
-    return 0U;
+	return 1ULL << sq;
 }
 
 char* algebricPos(u8 sq) {
@@ -640,27 +510,30 @@ int divide(u8 depth, u8 color) {
     
     char pieceName[2][8] = { { ' ', (char) 0, 'N', 'B', 'R', 'Q', 'K', '\0'}, { ' ', (char) 0, 'n', 'b', 'r', 'q', 'k', '\0'}};
     
-    u32 move_list[MAX_MOVES];
+    Move move_list[MAX_MOVES];
     
     u64 total_nodes = 0;
     u8 moveType;
     u64 nodes;
     u8 sideToMove = color;
     
-    u32 noOfMoves = genMoves(move_list, sideToMove);
+    u8 noOfMoves = genMoves(move_list, sideToMove);
     u8 count = 0;
     
     clock_t start, end;
     double cpu_time_used;
     double nps;
 
+	Move move;
     for (u8 i = 0; i < noOfMoves; i++) {
-        
+       
         start = clock();
+       
+		move = move_list[i];
+		
+        make_move(move.move);
         
-        make_move(move_list[i]);
-        
-        moveType = move_type(move_list[i]);
+        moveType = move_type(move.move);
         nodes = 0;
         
         if (isSqAttacked(bitScanForward(pieceBB[sideToMove][KING]), sideToMove)) {
@@ -680,13 +553,13 @@ int divide(u8 depth, u8 color) {
             
             total_nodes = total_nodes + nodes;
             
-            printf("%d)%c%s-%s, ", count, pieceName[colorType(move_list[i])][pieceType(move_list[i])],
-                   algebricPos(from_sq(move_list[i])), algebricPos(to_sq(move_list[i])));
+            printf("%d)%c%s-%s, ", count, pieceName[colorType(move.move)][pieceType(move.move)],
+                   algebricPos(from_sq(move.move)), algebricPos(to_sq(move.move)));
             
             printf("%llu, Move type  - %d, castle flags -" BYTE_TO_BINARY_PATTERN", nps  - %7.3f MN/s\n", nodes, moveType, BYTE_TO_BINARY(moveStack[ply].castleFlags),  nps);
         }
         
-        unmake_move(move_list[i]);
+        unmake_move(move.move);
     }
     
     printf("Total nodes -> %llu\n", total_nodes);
@@ -703,18 +576,75 @@ void checkUp() {
     readInput();
 }
 
+void initHashKey(u8 sideToMove) {
+	
+	u64 bitboard;
+	
+	hashKey = 0ULL;
+    for(int i = 0; i < 2; i++) {
+    
+        for(int j = PAWNS; j <= KING; j++) {
+            
+            bitboard = pieceBB[i][j];
+            while (bitboard) {
+                
+				hashKey ^= zobrist[i][j][bitScanForward(bitboard)];
+                bitboard &= bitboard - 1;
+            }
+        }
+    }
+	
+	hashKey ^= KEY_FLAG_WHITE_CASTLE_QUEEN_SIDE ^ KEY_FLAG_WHITE_CASTLE_KING_SIDE;
+	hashKey ^= KEY_FLAG_BLACK_CASTLE_QUEEN_SIDE ^ KEY_FLAG_BLACK_CASTLE_KING_SIDE;
+	
+	if(sideToMove) {
+		
+		hashKey ^= KEY_BLACK_TO_MOVE;
+	}
+}
+
 void clearHashTable() {
 	
 	for(int i = 0; i < HASH_TABLE_SIZE; i++) {
 		
 		hashTable[i].key = 0ULL;
 		hashTable[i].move = 0UL;
-		hashTable[i].value = 0;
 		hashTable[i].depth = -1;
+		hashTable[i].value = -1;
 		hashTable[i].flags = -1;
 	}
 }
 
+void clearRepetitionHashTable() {
+	
+	for(int i = 0; i < 2048; i++) {
+		
+		repHashTable[i] = 0ULL;
+	}
+	
+	repIndex = 0;
+	fiftyMoves = 0;
+}
+
+void clearKillerMovesTable() {
+	
+	for(int i = 0; i < MAX_PLY; i++) {
+		killerMoves[i].killerMove1 = 0UL;
+		killerMoves[i].killerMove2 = 0UL;
+	}
+}
+
+void clearHistoryTable() {
+	
+	for(int i = 0; i < 2; i++) {
+		for(int j = 0; j < 8; j++) {
+			for(int k = 0; k < 64; k++) {
+	
+				historyScore[i][j][k] = 0ULL;
+			}
+		}
+	}
+}
 
 
 

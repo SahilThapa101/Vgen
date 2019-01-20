@@ -9,6 +9,7 @@
 #include <stdbool.h>
 #include "make_unmake.h"
 #include "utility.h"
+#include "hash.h"
 
 void make_move(u32 move) {
     
@@ -40,21 +41,65 @@ void make_move(u32 move) {
             occupied ^= from_to_bb;
             empty ^= from_to_bb;
             
+			hashKey ^= zobrist[sideToMove][piece][fromSq] ^ zobrist[sideToMove][piece][toSq];
+			
             // update castle flags
+			
+			if(piece == PAWNS) {
+				fiftyMoves++;
+			}
+			
             if (piece == KING) {
                 if (sideToMove == WHITE) {
-                    moveStack[ply].castleFlags &= ~(CastleFlagWhiteKing
-                                                    | CastleFlagWhiteQueen);
-                } else {
-                    moveStack[ply].castleFlags &= ~(CastleFlagBlackKing
-                                                    | CastleFlagBlackQueen);
+					
+					int castleQueenSide = moveStack[ply].castleFlags & CastleFlagWhiteQueen;
+					int castleKingSide = moveStack[ply].castleFlags & CastleFlagWhiteKing;
+				
+					if (castleQueenSide){
+						moveStack[ply].castleFlags &= ~CastleFlagWhiteQueen;
+						hashKey ^= KEY_FLAG_WHITE_CASTLE_QUEEN_SIDE;
+					}
+					
+					if(castleKingSide) {
+						moveStack[ply].castleFlags &= ~CastleFlagWhiteKing;
+						hashKey ^= KEY_FLAG_WHITE_CASTLE_KING_SIDE;
+					}
+			    } else {
+                    
+					int castleQueenSide = moveStack[ply].castleFlags & CastleFlagBlackQueen;
+					int castleKingSide = moveStack[ply].castleFlags & CastleFlagBlackKing;
+				
+					if (castleQueenSide){
+						moveStack[ply].castleFlags &= ~CastleFlagBlackQueen;
+						hashKey ^= KEY_FLAG_BLACK_CASTLE_QUEEN_SIDE;
+					}
+					
+					if(castleKingSide) {
+						moveStack[ply].castleFlags &= ~CastleFlagBlackKing;
+						hashKey ^= KEY_FLAG_BLACK_CASTLE_KING_SIDE;
+					}
                 }
             } else if (piece == ROOKS) {
-                moveStack[ply].castleFlags &= rookCastleFlagMask[fromSq];
-            }
-            
+              
+				if(fromSq == 0 && (moveStack[ply].castleFlags & CastleFlagWhiteQueen)) {
+				
+					hashKey ^= KEY_FLAG_WHITE_CASTLE_QUEEN_SIDE;	
+				} else if(fromSq == 56 && (moveStack[ply].castleFlags & CastleFlagBlackQueen)) {
+				
+					hashKey ^= KEY_FLAG_BLACK_CASTLE_QUEEN_SIDE;
+				} else if(fromSq == 7 && (moveStack[ply].castleFlags & CastleFlagWhiteKing)) {
+				
+					hashKey ^= KEY_FLAG_WHITE_CASTLE_KING_SIDE;
+				} else if(fromSq == 63 && (moveStack[ply].castleFlags & CastleFlagBlackKing)) {
+				
+					hashKey ^= KEY_FLAG_BLACK_CASTLE_KING_SIDE;
+				}
+				
+				moveStack[ply].castleFlags &= rookCastleFlagMask[fromSq];
+			}				
             break;
         case MOVE_CAPTURE:
+			fiftyMoves++;
             cap++;
             
             pieceBB[sideToMove][piece] ^= from_to_bb;
@@ -65,26 +110,86 @@ void make_move(u32 move) {
             occupied ^= from_bb;
             empty ^= from_bb;
             
-            // update castle flags
+            hashKey ^= zobrist[sideToMove][piece][fromSq] ^ zobrist[sideToMove][piece][toSq];
+			hashKey ^= zobrist[sideToMove ^ 1][c_piece][toSq];
+			
+			// update castle flags
+            
             if (piece == KING) {
                 if (sideToMove == WHITE) {
-                    moveStack[ply].castleFlags &= ~(CastleFlagWhiteKing
-                                                    | CastleFlagWhiteQueen);
-                } else {
-                    moveStack[ply].castleFlags &= ~(CastleFlagBlackKing
-                                                    | CastleFlagBlackQueen);
+					
+					int castleQueenSide = moveStack[ply].castleFlags & CastleFlagWhiteQueen;
+					int castleKingSide = moveStack[ply].castleFlags & CastleFlagWhiteKing;
+				
+					if (castleQueenSide){
+						moveStack[ply].castleFlags &= ~CastleFlagWhiteQueen;
+						hashKey ^= KEY_FLAG_WHITE_CASTLE_QUEEN_SIDE;
+					}
+					
+					if(castleKingSide) {
+						moveStack[ply].castleFlags &= ~CastleFlagWhiteKing;
+						hashKey ^= KEY_FLAG_WHITE_CASTLE_KING_SIDE;
+					}
+			    } else {
+                    
+					int castleQueenSide = moveStack[ply].castleFlags & CastleFlagBlackQueen;
+					int castleKingSide = moveStack[ply].castleFlags & CastleFlagBlackKing;
+				
+					if (castleQueenSide){
+						moveStack[ply].castleFlags &= ~CastleFlagBlackQueen;
+						hashKey ^= KEY_FLAG_BLACK_CASTLE_QUEEN_SIDE;
+					}
+					
+					if(castleKingSide) {
+						moveStack[ply].castleFlags &= ~CastleFlagBlackKing;
+						hashKey ^= KEY_FLAG_BLACK_CASTLE_KING_SIDE;
+					}
                 }
             } else if (piece == ROOKS) {
-                moveStack[ply].castleFlags &= rookCastleFlagMask[fromSq];
-            }
-            
+              
+				
+				if(fromSq == 0 && (moveStack[ply].castleFlags & CastleFlagWhiteQueen)) {
+				
+					hashKey ^= KEY_FLAG_WHITE_CASTLE_QUEEN_SIDE;	
+				} else if(fromSq == 56 && (moveStack[ply].castleFlags & CastleFlagBlackQueen)) {
+				
+					hashKey ^= KEY_FLAG_BLACK_CASTLE_QUEEN_SIDE;
+				} else if(fromSq == 7 && (moveStack[ply].castleFlags & CastleFlagWhiteKing)) {
+				
+					hashKey ^= KEY_FLAG_WHITE_CASTLE_KING_SIDE;
+				} else if(fromSq == 63 && (moveStack[ply].castleFlags & CastleFlagBlackKing)) {
+				
+					hashKey ^= KEY_FLAG_BLACK_CASTLE_KING_SIDE;
+				}
+				
+				moveStack[ply].castleFlags &= rookCastleFlagMask[fromSq];
+			}
+        	
             if (c_piece == ROOKS) {
-                moveStack[ply].castleFlags &= rookCastleFlagMask[toSq];
+                
+				
+				if(toSq == 0 && (moveStack[ply].castleFlags & CastleFlagWhiteQueen)) {
+				
+					hashKey ^= KEY_FLAG_WHITE_CASTLE_QUEEN_SIDE;	
+				} else if(toSq == 56 && (moveStack[ply].castleFlags & CastleFlagBlackQueen)) {
+				
+					hashKey ^= KEY_FLAG_BLACK_CASTLE_QUEEN_SIDE;
+				} else if(toSq == 7 && (moveStack[ply].castleFlags & CastleFlagWhiteKing)) {
+				
+					hashKey ^= KEY_FLAG_WHITE_CASTLE_KING_SIDE;
+				} else if(toSq == 63 && (moveStack[ply].castleFlags & CastleFlagBlackKing)) {
+				
+					hashKey ^= KEY_FLAG_BLACK_CASTLE_KING_SIDE;
+				}
+				
+				moveStack[ply].castleFlags &= rookCastleFlagMask[toSq];
             }
             
             break;
             
         case MOVE_DOUBLE_PUSH:
+		
+			fiftyMoves++;
             quiet++;
             // pawn double pushes
             
@@ -97,9 +202,40 @@ void make_move(u32 move) {
             occupied ^= from_to_bb;
             empty ^= from_to_bb;
             
+            hashKey ^= zobrist[sideToMove][piece][fromSq] ^ zobrist[sideToMove][piece][toSq];
+			
+			u64 epSqBitboard = getBitboardFromSquare(moveStack[ply].epSquare);
+			
+			if(epSqBitboard & A_FILE) {
+				hashKey ^= KEY_EP_A_FILE;
+			} else if(epSqBitboard & B_FILE) {
+			
+				hashKey ^= KEY_EP_B_FILE;
+			} else if(epSqBitboard & C_FILE) {
+			
+				hashKey ^= KEY_EP_C_FILE;
+			} else if(epSqBitboard & D_FILE) {
+			
+				hashKey ^= KEY_EP_D_FILE;
+			} else if(epSqBitboard & E_FILE) {
+			
+				hashKey ^= KEY_EP_E_FILE;
+			} else if(epSqBitboard & F_FILE) {
+			
+				hashKey ^= KEY_EP_F_FILE;
+			} else if(epSqBitboard & G_FILE) {
+			
+				hashKey ^= KEY_EP_G_FILE;
+			} else if(epSqBitboard & H_FILE) {
+			
+				hashKey ^= KEY_EP_H_FILE;
+			} 
+			
             break;
             
         case MOVE_ENPASSANT:
+		
+			fiftyMoves++;
             ep++;
             //  en_passant capture
             
@@ -117,7 +253,10 @@ void make_move(u32 move) {
                 occupied ^= to_bb;
                 // remove the captured piece
                 occupied ^= (to_bb >> 8);
-            } else {
+
+				hashKey ^= zobrist[sideToMove][PAWNS][fromSq] ^ zobrist[sideToMove][piece][toSq];
+				hashKey ^= zobrist[sideToMove ^ 1][PAWNS][toSq - 8];
+			} else {
                 
                 pieceBB[WHITE][PAWNS] ^= (to_bb << 8);
                 pieceBB[WHITE][PIECES] ^= (to_bb << 8);
@@ -128,14 +267,17 @@ void make_move(u32 move) {
                 occupied ^= to_bb;
                 // remove the captured piece
                 occupied ^= (to_bb << 8);
+				
+				hashKey ^= zobrist[sideToMove][PAWNS][fromSq] ^ zobrist[sideToMove][piece][toSq];
+				hashKey ^= zobrist[sideToMove ^ 1][PAWNS][toSq + 8];
             }
             
             empty = ~occupied;
-            
-            break;
-            
+			
+            break;   
         case MOVE_CASTLE:
             cas++;
+			fiftyMoves++;
             
             u8 castleDirection = castleDir(move);
             
@@ -156,6 +298,10 @@ void make_move(u32 move) {
                     // update pieces
                     pieceBB[WHITE][PIECES] ^= 0x0000000000000011U;
                     pieceBB[WHITE][PIECES] ^= 0x000000000000000CU;
+					
+					hashKey ^= zobrist[WHITE][KING][4] ^ zobrist[WHITE][KING][2];
+					hashKey ^= zobrist[WHITE][ROOKS][0] ^ zobrist[WHITE][ROOKS][3];
+					hashKey ^= KEY_FLAG_WHITE_CASTLE_QUEEN_SIDE;
                 } else if (castleDirection == WHITE_CASTLE_KING_SIDE) {
                     
                     //clear out king and rook
@@ -169,7 +315,11 @@ void make_move(u32 move) {
                     // update pieces
                     pieceBB[WHITE][PIECES] ^= 0x0000000000000090U;
                     pieceBB[WHITE][PIECES] ^= 0x0000000000000060U;
-                }
+                
+					hashKey ^= zobrist[WHITE][KING][4] ^ zobrist[WHITE][KING][6];
+					hashKey ^= zobrist[WHITE][ROOKS][7] ^ zobrist[WHITE][ROOKS][5];
+					hashKey ^= KEY_FLAG_WHITE_CASTLE_KING_SIDE;
+				}
             } else {
                 
                 moveStack[ply].castleFlags &= ~(CastleFlagBlackKing
@@ -188,7 +338,10 @@ void make_move(u32 move) {
                     // update pieces
                     pieceBB[BLACK][PIECES] ^= 0x1100000000000000U;
                     pieceBB[BLACK][PIECES] ^= 0x0C00000000000000U;
-                    
+					
+					hashKey ^= zobrist[BLACK][KING][60] ^ zobrist[BLACK][KING][58];
+					hashKey ^= zobrist[BLACK][ROOKS][56] ^ zobrist[BLACK][ROOKS][59];
+					hashKey ^= KEY_FLAG_BLACK_CASTLE_QUEEN_SIDE;
                 } else if (castleDirection == BLACK_CASTLE_KING_SIDE) {
                     
                     //clear out king and rook
@@ -202,7 +355,11 @@ void make_move(u32 move) {
                     // update pieces
                     pieceBB[BLACK][PIECES] ^= 0x9000000000000000U;
                     pieceBB[BLACK][PIECES] ^= 0x6000000000000000U;
-                }
+                
+					hashKey ^= zobrist[BLACK][KING][60] ^ zobrist[BLACK][KING][62];
+					hashKey ^= zobrist[BLACK][ROOKS][63] ^ zobrist[BLACK][ROOKS][61];
+					hashKey ^= KEY_FLAG_BLACK_CASTLE_KING_SIDE;
+				}
             }
             
             occupied = pieceBB[WHITE][PIECES] | pieceBB[BLACK][PIECES];
@@ -212,6 +369,7 @@ void make_move(u32 move) {
             
         case MOVE_PROMOTION:
             
+			fiftyMoves++;
             prom++;
             
             switch (promType(move)) {
@@ -234,6 +392,9 @@ void make_move(u32 move) {
                         empty ^= from_to_bb;
                     }
                     
+					hashKey ^= zobrist[sideToMove][PAWNS][fromSq];
+					hashKey ^= zobrist[sideToMove][QUEEN][toSq];
+					
                     break;
                     
                 case PROMOTE_TO_ROOK:
@@ -254,6 +415,9 @@ void make_move(u32 move) {
                         empty ^= from_to_bb;
                     }
                     
+					hashKey ^= zobrist[sideToMove][PAWNS][fromSq];
+					hashKey ^= zobrist[sideToMove][ROOKS][toSq];
+					
                     break;
                     
                 case PROMOTE_TO_KNIGHT:
@@ -273,6 +437,9 @@ void make_move(u32 move) {
                         empty ^= from_to_bb;
                     }
                     
+					hashKey ^= zobrist[sideToMove][PAWNS][fromSq];
+					hashKey ^= zobrist[sideToMove][KNIGHTS][toSq];
+					
                     break;
                     
                 case PROMOTE_TO_BISHOP:
@@ -291,15 +458,20 @@ void make_move(u32 move) {
                         occupied ^= from_to_bb;
                         empty ^= from_to_bb;
                     }
+					
+					hashKey ^= zobrist[sideToMove][PAWNS][fromSq];
+					hashKey ^= zobrist[sideToMove][BISHOPS][toSq];
+					
                     break;
             }
             
             if (c_piece == ROOKS) {
                 moveStack[ply].prevCastleFlags = moveStack[ply].castleFlags;
                 moveStack[ply].castleFlags &= rookCastleFlagMask[toSq];
-            }
+			}
             
             break;
+		
         default:
             break;
     }
@@ -310,8 +482,11 @@ void unmake_move(u32 move) {
     
     u8 castleDirection = castleDir(move);
     
-    from_bb = index_bb[from_sq(move)];
-    to_bb = index_bb[to_sq(move)];
+	u8 fromSq = from_sq(move);
+	u8 toSq = to_sq(move);
+	
+    from_bb = index_bb[fromSq];
+    to_bb = index_bb[toSq];
     
     from_to_bb = from_bb ^ to_bb;
     
@@ -321,8 +496,8 @@ void unmake_move(u32 move) {
     u8 sideToMove = colorType(move);
     
     moveStack[ply].castleFlags = moveStack[ply].prevCastleFlags;
-    
-    switch (move_type(move)) {
+	
+	switch (move_type(move)) {
             
         case MOVE_NORMAL:
             
@@ -331,10 +506,60 @@ void unmake_move(u32 move) {
             
             occupied ^= from_to_bb;
             empty ^= from_to_bb;
-            
+			
+			hashKey ^= zobrist[sideToMove][piece][fromSq] ^ zobrist[sideToMove][piece][toSq];
+			
+			if(piece == PAWNS) {
+				fiftyMoves--;
+			}
+			
+			if (piece == KING) {
+                if (sideToMove == WHITE) {
+					
+					int castleQueenSide = moveStack[ply].castleFlags & CastleFlagWhiteQueen;
+					int castleKingSide = moveStack[ply].castleFlags & CastleFlagWhiteKing;
+				
+					if (castleQueenSide){
+						hashKey ^= KEY_FLAG_WHITE_CASTLE_QUEEN_SIDE;
+					}
+					
+					if(castleKingSide) {
+						hashKey ^= KEY_FLAG_WHITE_CASTLE_KING_SIDE;
+					}
+			    } else {
+                    
+					int castleQueenSide = moveStack[ply].castleFlags & CastleFlagBlackQueen;
+					int castleKingSide = moveStack[ply].castleFlags & CastleFlagBlackKing;
+				
+					if (castleQueenSide){
+						hashKey ^= KEY_FLAG_BLACK_CASTLE_QUEEN_SIDE;
+					}
+					
+					if(castleKingSide) {
+						hashKey ^= KEY_FLAG_BLACK_CASTLE_KING_SIDE;
+					}
+                }
+            } else if (piece == ROOKS) {				
+				
+				if(fromSq == 0 && (moveStack[ply].castleFlags & CastleFlagWhiteQueen)) {
+				
+					hashKey ^= KEY_FLAG_WHITE_CASTLE_QUEEN_SIDE;	
+				} else if(fromSq == 56 && (moveStack[ply].castleFlags & CastleFlagBlackQueen)) {
+				
+					hashKey ^= KEY_FLAG_BLACK_CASTLE_QUEEN_SIDE;
+				} else if(fromSq == 7 && (moveStack[ply].castleFlags & CastleFlagWhiteKing)) {
+				
+					hashKey ^= KEY_FLAG_WHITE_CASTLE_KING_SIDE;
+				} else if(fromSq == 63 && (moveStack[ply].castleFlags & CastleFlagBlackKing)) {
+				
+					hashKey ^= KEY_FLAG_BLACK_CASTLE_KING_SIDE;
+				}
+			}
             break;
         case MOVE_CAPTURE:
             
+			fiftyMoves--;
+			
             pieceBB[sideToMove][piece] ^= from_to_bb;
             pieceBB[sideToMove][PIECES] ^= from_to_bb;
             
@@ -344,19 +569,115 @@ void unmake_move(u32 move) {
             occupied ^= from_bb;
             empty ^= from_bb;
             
+            hashKey ^= zobrist[sideToMove][piece][fromSq] ^ zobrist[sideToMove][piece][toSq];
+			hashKey ^= zobrist[sideToMove ^ 1][c_piece][toSq];
+			
+			 if (piece == KING) {
+                if (sideToMove == WHITE) {
+					
+					int castleQueenSide = moveStack[ply].castleFlags & CastleFlagWhiteQueen;
+					int castleKingSide = moveStack[ply].castleFlags & CastleFlagWhiteKing;
+				
+					if (castleQueenSide){
+						hashKey ^= KEY_FLAG_WHITE_CASTLE_QUEEN_SIDE;
+					}
+					
+					if(castleKingSide) {
+						hashKey ^= KEY_FLAG_WHITE_CASTLE_KING_SIDE;
+					}
+			    } else {
+                    
+					int castleQueenSide = moveStack[ply].castleFlags & CastleFlagBlackQueen;
+					int castleKingSide = moveStack[ply].castleFlags & CastleFlagBlackKing;
+				
+					if (castleQueenSide){
+						hashKey ^= KEY_FLAG_BLACK_CASTLE_QUEEN_SIDE;
+					}
+					
+					if(castleKingSide) {
+						hashKey ^= KEY_FLAG_BLACK_CASTLE_KING_SIDE;
+					}
+                }
+            } else if (piece == ROOKS) {
+           	
+				if(fromSq == 0 && (moveStack[ply].castleFlags & CastleFlagWhiteQueen)) {
+				
+					hashKey ^= KEY_FLAG_WHITE_CASTLE_QUEEN_SIDE;	
+				} else if(fromSq == 56 && (moveStack[ply].castleFlags & CastleFlagBlackQueen)) {
+				
+					hashKey ^= KEY_FLAG_BLACK_CASTLE_QUEEN_SIDE;
+				} else if(fromSq == 7 && (moveStack[ply].castleFlags & CastleFlagWhiteKing)) {
+				
+					hashKey ^= KEY_FLAG_WHITE_CASTLE_KING_SIDE;
+				} else if(fromSq == 63 && (moveStack[ply].castleFlags & CastleFlagBlackKing)) {
+				
+					hashKey ^= KEY_FLAG_BLACK_CASTLE_KING_SIDE;
+				}
+			}
+        	
+            if (c_piece == ROOKS) {
+                
+				if(toSq == 0 && (moveStack[ply].castleFlags & CastleFlagWhiteQueen)) {
+				
+					hashKey ^= KEY_FLAG_WHITE_CASTLE_QUEEN_SIDE;	
+				} else if(toSq == 56 && (moveStack[ply].castleFlags & CastleFlagBlackQueen)) {
+				
+					hashKey ^= KEY_FLAG_BLACK_CASTLE_QUEEN_SIDE;
+				} else if(toSq == 7 && (moveStack[ply].castleFlags & CastleFlagWhiteKing)) {
+				
+					hashKey ^= KEY_FLAG_WHITE_CASTLE_KING_SIDE;
+				} else if(toSq == 63 && (moveStack[ply].castleFlags & CastleFlagBlackKing)) {
+				
+					hashKey ^= KEY_FLAG_BLACK_CASTLE_KING_SIDE;
+				}
+            }
+			
             break;
         case MOVE_DOUBLE_PUSH:
             
+			fiftyMoves--;
+			
             pieceBB[sideToMove][piece] ^= from_to_bb;
             pieceBB[sideToMove][PIECES] ^= from_to_bb;
             
             occupied ^= from_to_bb;
             empty ^= from_to_bb;
             
+			hashKey ^= zobrist[sideToMove][piece][fromSq] ^ zobrist[sideToMove][piece][toSq];
+			
+			u64 epSqBitboard = getBitboardFromSquare((from_bb << 8) >> 16 * sideToMove);
+			
+			if(epSqBitboard & A_FILE) {
+				hashKey ^= KEY_EP_A_FILE;
+			} else if(epSqBitboard & B_FILE) {
+			
+				hashKey ^= KEY_EP_B_FILE;
+			} else if(epSqBitboard & C_FILE) {
+			
+				hashKey ^= KEY_EP_C_FILE;
+			} else if(epSqBitboard & D_FILE) {
+			
+				hashKey ^= KEY_EP_D_FILE;
+			} else if(epSqBitboard & E_FILE) {
+			
+				hashKey ^= KEY_EP_E_FILE;
+			} else if(epSqBitboard & F_FILE) {
+			
+				hashKey ^= KEY_EP_F_FILE;
+			} else if(epSqBitboard & G_FILE) {
+			
+				hashKey ^= KEY_EP_G_FILE;
+			} else if(epSqBitboard & H_FILE) {
+			
+				hashKey ^= KEY_EP_H_FILE;
+			} 
+			
             break;
             
         case MOVE_ENPASSANT:
             
+			fiftyMoves--;
+			
             pieceBB[sideToMove][PAWNS] ^= from_to_bb;
             pieceBB[sideToMove][PIECES] ^= from_to_bb;
             
@@ -371,6 +692,9 @@ void unmake_move(u32 move) {
                 occupied ^= to_bb;
                 // restore the captured piece
                 occupied ^= (to_bb >> 8);
+				
+				hashKey ^= zobrist[sideToMove][PAWNS][fromSq] ^ zobrist[sideToMove][piece][toSq];
+				hashKey ^= zobrist[sideToMove ^ 1][PAWNS][toSq - 8];
             } else {
                 
                 pieceBB[WHITE][PAWNS] ^= (to_bb << 8);
@@ -382,6 +706,9 @@ void unmake_move(u32 move) {
                 occupied ^= to_bb;
                 // restore the captured piece
                 occupied ^= (to_bb << 8);
+				
+				hashKey ^= zobrist[sideToMove][PAWNS][fromSq] ^ zobrist[sideToMove][piece][toSq];
+				hashKey ^= zobrist[sideToMove ^ 1][PAWNS][toSq + 8];
             }
             
             empty = ~occupied;
@@ -389,6 +716,8 @@ void unmake_move(u32 move) {
             break;
         case MOVE_CASTLE:
             
+			fiftyMoves--;
+			
             if (castleDirection == WHITE_CASTLE_QUEEN_SIDE) {
                 
                 // clear king and rook
@@ -402,7 +731,11 @@ void unmake_move(u32 move) {
                 // update pieces
                 pieceBB[WHITE][PIECES] ^= 0x000000000000000CU;
                 pieceBB[WHITE][PIECES] ^= 0x0000000000000011U;
-            } else if (castleDirection == WHITE_CASTLE_KING_SIDE) {
+						
+				hashKey ^= zobrist[WHITE][KING][4] ^ zobrist[WHITE][KING][2];
+				hashKey ^= zobrist[WHITE][ROOKS][0] ^ zobrist[WHITE][ROOKS][3];
+				hashKey ^= KEY_FLAG_WHITE_CASTLE_QUEEN_SIDE;
+			} else if (castleDirection == WHITE_CASTLE_KING_SIDE) {
                 
                 pieceBB[WHITE][piece] ^= 0x0000000000000040U;
                 pieceBB[WHITE][c_piece] ^= 0x0000000000000020U;
@@ -412,7 +745,11 @@ void unmake_move(u32 move) {
                 
                 pieceBB[WHITE][PIECES] ^= 0x0000000000000060U;
                 pieceBB[WHITE][PIECES] ^= 0x0000000000000090U;
-            } else if (castleDirection == BLACK_CASTLE_QUEEN_SIDE) {
+				
+				hashKey ^= zobrist[WHITE][KING][4] ^ zobrist[WHITE][KING][6];
+				hashKey ^= zobrist[WHITE][ROOKS][7] ^ zobrist[WHITE][ROOKS][5];
+				hashKey ^= KEY_FLAG_WHITE_CASTLE_KING_SIDE;		   
+		   } else if (castleDirection == BLACK_CASTLE_QUEEN_SIDE) {
                 
                 pieceBB[BLACK][piece] ^= 0x0400000000000000U;
                 pieceBB[BLACK][c_piece] ^= 0x0800000000000000U;
@@ -422,8 +759,11 @@ void unmake_move(u32 move) {
                 
                 pieceBB[BLACK][PIECES] ^= 0x0C00000000000000U;
                 pieceBB[BLACK][PIECES] ^= 0x1100000000000000U;
-                
-            } else if (castleDirection == BLACK_CASTLE_KING_SIDE) {
+            
+				hashKey ^= zobrist[BLACK][KING][60] ^ zobrist[BLACK][KING][58];
+				hashKey ^= zobrist[BLACK][ROOKS][56] ^ zobrist[BLACK][ROOKS][59];
+				hashKey ^= KEY_FLAG_BLACK_CASTLE_QUEEN_SIDE;	   
+		   } else if (castleDirection == BLACK_CASTLE_KING_SIDE) {
                 
                 pieceBB[BLACK][piece] ^= 0x4000000000000000U;
                 pieceBB[BLACK][c_piece] ^= 0x2000000000000000U;
@@ -433,7 +773,11 @@ void unmake_move(u32 move) {
                 
                 pieceBB[BLACK][PIECES] ^= 0x6000000000000000U;
                 pieceBB[BLACK][PIECES] ^= 0x9000000000000000U;
-            }
+
+				hashKey ^= zobrist[BLACK][KING][60] ^ zobrist[BLACK][KING][62];
+				hashKey ^= zobrist[BLACK][ROOKS][63] ^ zobrist[BLACK][ROOKS][61];
+				hashKey ^= KEY_FLAG_BLACK_CASTLE_KING_SIDE;
+			}
             
             occupied = pieceBB[WHITE][PIECES] | pieceBB[BLACK][PIECES];
             empty = ~occupied;
@@ -441,6 +785,8 @@ void unmake_move(u32 move) {
             break;
         case MOVE_PROMOTION:
             
+			fiftyMoves--;
+			
             switch (promType(move)) {
                     
                 case PROMOTE_TO_QUEEN:
@@ -460,7 +806,10 @@ void unmake_move(u32 move) {
                         empty ^= from_to_bb;
                     }
                     
-                    break;
+					hashKey ^= zobrist[sideToMove][PAWNS][fromSq];
+					hashKey ^= zobrist[sideToMove][QUEEN][toSq];
+                   
+				   break;
                 case PROMOTE_TO_ROOK:
                     pieceBB[sideToMove][PAWNS] ^= from_bb;
                     pieceBB[sideToMove][ROOKS] ^= to_bb;
@@ -477,6 +826,9 @@ void unmake_move(u32 move) {
                         occupied ^= from_to_bb;
                         empty ^= from_to_bb;
                     }
+					
+					hashKey ^= zobrist[sideToMove][PAWNS][fromSq];
+					hashKey ^= zobrist[sideToMove][ROOKS][toSq];
                     
                     break;
                 case PROMOTE_TO_KNIGHT:
@@ -496,6 +848,9 @@ void unmake_move(u32 move) {
                         empty ^= from_to_bb;
                     }
                     
+					hashKey ^= zobrist[sideToMove][PAWNS][fromSq];
+					hashKey ^= zobrist[sideToMove][KNIGHTS][toSq];
+                    
                     break;
                     
                 case PROMOTE_TO_BISHOP:
@@ -514,10 +869,31 @@ void unmake_move(u32 move) {
                         occupied ^= from_to_bb;
                         empty ^= from_to_bb;
                     }
+					
+					hashKey ^= zobrist[sideToMove][PAWNS][fromSq];
+					hashKey ^= zobrist[sideToMove][BISHOPS][toSq];
+                    
                     break;
             }
             
-            break;
+            if (c_piece == ROOKS) {
+				
+				if(toSq == 0) {
+				
+					hashKey ^= KEY_FLAG_WHITE_CASTLE_QUEEN_SIDE;	
+				} else if(toSq == 56) {
+				
+					hashKey ^= KEY_FLAG_BLACK_CASTLE_QUEEN_SIDE;
+				} else if(toSq == 7) {
+				
+					hashKey ^= KEY_FLAG_WHITE_CASTLE_KING_SIDE;
+				} else if(toSq == 63) {
+				
+					hashKey ^= KEY_FLAG_BLACK_CASTLE_KING_SIDE;
+				}
+            }
+			
+         break;
     }
 }
 

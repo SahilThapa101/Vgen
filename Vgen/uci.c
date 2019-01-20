@@ -17,9 +17,10 @@
 #include "movegen.h"
 #include "vtime.h"
 #include "search.h"
+#include "perft.h"
+#include "hash.h"
 
-#define INPUTBUFFER 400 * 6
-#define NAME "Vgen"
+#define NAME "Vgen_20190120"
 #define START_FEN "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
 
 int addFileNumber(char ch) {
@@ -61,235 +62,44 @@ u32 parseMove(char *ptrChar, u8 sideToMove) {
     // 0 - 63
     u8 fromSq;
     u8 toSq;
-    u8 fromRank;
-    u8 toRank;
-    u64 fromBB;
-    u64 toBB;
     char fromFile;
     char toFile;
-    int piece = -1;
     
     fromFile = *ptrChar;
     ptrChar++;
-    fromRank = ((int)*ptrChar - '0') - 1;
-    fromSq = (fromRank * 8) + addFileNumber(fromFile);
-    fromBB = getBitboardFromSquare(fromSq);
+    fromSq = ((((int)*ptrChar - '0') - 1) * 8) + addFileNumber(fromFile);
     
     ptrChar++;
-    toFile = *ptrChar;
-    ptrChar++;
-    toRank = ((int)*ptrChar - '0') - 1;
-    toSq = (toRank * 8) + addFileNumber(toFile);
-    toBB = getBitboardFromSquare(toSq);
     
-	u32 moveList[MAX_MOVES];
+	toFile = *ptrChar;
+    ptrChar++;
+    toSq = ((((int)*ptrChar - '0') - 1) * 8) + addFileNumber(toFile);
+    
+	Move moveList[MAX_MOVES];
 	
 	u8 moveCount = genMoves(moveList, sideToMove);
 	
+	u32 move;
 	for(int i = 0; i < moveCount; i++) {
 		
-		int fromSquare = from_sq(moveList[i]);
-		int toSquare = to_sq(moveList[i]);
+		int fromSquare = from_sq(moveList[i].move);
+		int toSquare = to_sq(moveList[i].move);
 		
 		if(fromSquare == fromSq && toSquare == toSq) {
 			
-			return moveList[i];
+			return moveList[i].move;
 		}	
 	}		
 	
-	
-	/* 
-    if(fromBB & pieceBB[sideToMove][PAWNS]) {
-       
-        piece = PAWNS;
-    } else if(fromBB & pieceBB[sideToMove][KNIGHTS]) {
-        
-        piece = KNIGHTS;
-    } else if (fromBB & pieceBB[sideToMove][BISHOPS]) {
-        
-        piece = BISHOPS;
-    } else if (fromBB & pieceBB[sideToMove][ROOKS]) {
-        
-        piece = ROOKS;
-    } else if (fromBB & pieceBB[sideToMove][QUEEN]) {
-        
-        piece = QUEEN;
-    } else if (fromBB & pieceBB[sideToMove][KING]) {
-        
-        piece = KING;
-    }
-	
-    if(piece == -1) {
-        return 0;
-    }
-	
-	if(piece == KING) {
-	  // check for castling
-		if(fromSq < 8 || fromSq > 55) {
-            
-			if(toSq < 8) {
-                ptrChar--;
-                // white castles
-				if(*ptrChar == 'g') {
-                    // white short castling
-				
-					return createMove(0, WHITE_CASTLE_KING_SIDE, MOVE_CASTLE, WHITE, ROOKS, KING, 4, 6);
-				} else {
-                    
-					return createMove(0, WHITE_CASTLE_QUEEN_SIDE, MOVE_CASTLE, WHITE, ROOKS, KING, 4, 2);
-				}
-			} else {
-                
-				// black castles
-				ptrChar--;
-				if(*ptrChar == 'g') {
-					
-                    // white short castling
-					return createMove(0, BLACK_CASTLE_KING_SIDE, MOVE_CASTLE, BLACK, ROOKS, KING, 60, 62);
-                    
-				} else {
-                    
-					return createMove(0, BLACK_CASTLE_QUEEN_SIDE, MOVE_CASTLE, BLACK, ROOKS, KING, 60, 58);
-				}
-			}
-		}
-	}
-    
-    
-    if(piece == PAWNS) {
-        
-        // check for enpassant
-        if(fromSq > 7 && fromSq < 56) {
-    
-            if((((sideToMove ? fromSq - 7 : fromSq + 7) == toSq) || (sideToMove ? fromSq - 9 : fromSq + 9) == toSq)
-                && (toBB & empty)) {
-                
-                // A - file pawns
-                if((fromSq % 8) == 0) {
-                        
-                    if(fromBB & pieceBB[sideToMove ^ 1][PAWNS]) {
-                        // valid enpassant move
-                        
-                        return createMove(0, 0, MOVE_ENPASSANT, sideToMove, PAWNS, PAWNS, fromSq, toSq);
-                    }
-                } else if(((fromSq % 7)  - fromRank) == 0) {
-                    // H - file pawns
-                    
-                    if(fromBB & pieceBB[sideToMove ^ 1][PAWNS]) {
-                        // valid enpassant move
-                        
-                        return createMove(0, 0, MOVE_ENPASSANT, sideToMove, PAWNS, PAWNS, fromSq, toSq);
-                    }
-                } else{
-                    // all pawns except A and H file
-                    if((fromBB & pieceBB[sideToMove ^ 1][PAWNS]) ||
-                        fromBB & pieceBB[sideToMove ^ 1][PAWNS]) {
-                            // valid enpassant move
-                        
-                        return createMove(0, 0, MOVE_ENPASSANT, sideToMove, PAWNS, PAWNS, fromSq, toSq);
-                    }
-                }
-            }
-        }
-    }
-	
-    if(piece == PAWNS) {
-        if (toSq < 8 || toSq > 55) {
-            
-            u8 promType;
-            
-            ptrChar++;
-            switch (*ptrChar) {
-                case 'r':
-                case 'R':
-                    promType = PROMOTE_TO_ROOK;
-                    break;
-                case 'b':
-                case 'B':
-                    promType = PROMOTE_TO_BISHOP;
-                    break;
-                case 'n':
-                case 'N':
-                    promType = PROMOTE_TO_KNIGHT;
-                    break;
-                default:
-                    promType = PROMOTE_TO_QUEEN;
-                    break;
-            }
-            
-            if(toBB & pieceBB[sideToMove ^ 1][PIECES]) {
-            
-                 if(toBB & pieceBB[sideToMove ^ 1][KNIGHTS]) {
-                    
-                    return createMove(promType, 0, MOVE_PROMOTION, sideToMove, KNIGHTS, piece, fromSq, toSq);
-                } else if(toBB & pieceBB[sideToMove ^ 1][BISHOPS]) {
-                    
-                    return createMove(promType, 0, MOVE_PROMOTION, sideToMove, BISHOPS, piece, fromSq, toSq);
-                } else if(toBB & pieceBB[sideToMove ^ 1][ROOKS]) {
-                    
-                    return createMove(promType, 0, MOVE_PROMOTION, sideToMove, ROOKS, piece, fromSq, toSq);
-                } else if(toBB & pieceBB[sideToMove ^ 1][QUEEN]) {
-                    
-                    return createMove(promType, 0, MOVE_PROMOTION, sideToMove, QUEEN, piece, fromSq, toSq);
-                }
-            } else {
-                
-                return createMove(promType, 0, MOVE_PROMOTION, sideToMove, DUMMY, PAWNS, fromSq, toSq);
-            }
-        } else if(sideToMove ? ((fromSq - 16) == toSq) : ((fromSq + 16) == toSq)) {
-            return createMove(0, 0, MOVE_DOUBLE_PUSH, sideToMove, DUMMY, PAWNS, fromSq, toSq);
-        } else if(toBB & pieceBB[sideToMove ^ 1][PIECES]) {
-            
-            if(toBB & pieceBB[sideToMove ^ 1][PAWNS]) {
-                
-                return createMove(0, 0, MOVE_CAPTURE, sideToMove, PAWNS, PAWNS, fromSq, toSq);
-            } else if(toBB & pieceBB[sideToMove ^ 1][KNIGHTS]) {
-                
-                return createMove(0, 0, MOVE_CAPTURE, sideToMove, KNIGHTS, PAWNS, fromSq, toSq);
-            } else if(toBB & pieceBB[sideToMove ^ 1][BISHOPS]) {
-                
-                return createMove(0, 0, MOVE_CAPTURE, sideToMove, BISHOPS, PAWNS, fromSq, toSq);
-            } else if(toBB & pieceBB[sideToMove ^ 1][ROOKS]) {
-                
-                return createMove(0, 0, MOVE_CAPTURE, sideToMove, ROOKS, PAWNS, fromSq, toSq);
-            } else if(toBB & pieceBB[sideToMove ^ 1][QUEEN]) {
-                
-                return createMove(0, 0, MOVE_CAPTURE, sideToMove, QUEEN, PAWNS, fromSq, toSq);
-            }
-        } else {
-            return createMove(0, 0, MOVE_NORMAL, sideToMove, DUMMY, PAWNS, fromSq, toSq);
-        }
-    } else {
-    
-		if(toBB & pieceBB[sideToMove ^ 1][PIECES]) {
-            
-			if(toBB & pieceBB[sideToMove ^ 1][PAWNS]) {
-                
-                return createMove(0, 0, MOVE_CAPTURE, sideToMove, PAWNS, piece, fromSq, toSq);
-            } else if(toBB & pieceBB[sideToMove ^ 1][KNIGHTS]) {
-                
-                return createMove(0, 0, MOVE_CAPTURE, sideToMove, KNIGHTS, piece, fromSq, toSq);
-            } else if(toBB & pieceBB[sideToMove ^ 1][BISHOPS]) {
-                
-                return createMove(0, 0, MOVE_CAPTURE, sideToMove, BISHOPS, piece, fromSq, toSq);
-            } else if(toBB & pieceBB[sideToMove ^ 1][ROOKS]) {
-                
-                return createMove(0, 0, MOVE_CAPTURE, sideToMove, ROOKS, piece, fromSq, toSq);
-            } else if(toBB & pieceBB[sideToMove ^ 1][QUEEN]) {
-                
-                return createMove(0, 0, MOVE_CAPTURE, sideToMove, QUEEN, piece, fromSq, toSq);
-            }
-        } else {
-        
-            return createMove(0, 0, MOVE_NORMAL, sideToMove, DUMMY, piece, fromSq, toSq);
-        }
-    } */
-    
+	//debugSEE(move, sideToMove);
+
     return 0;
 }
 
 void parsePosition(char* lineIn) {
     
+	u8 sideToMove = WHITE;
+
     lineIn += 9;
     char *ptrChar = lineIn;
     if(strncmp(lineIn, "startpos", 8) == 0) {
@@ -306,48 +116,42 @@ void parsePosition(char* lineIn) {
             parseFen(ptrChar);
         }
     }
+	
+	//clearRepetitionHashTable();
+	clearKillerMovesTable();
+	clearHistoryTable();
+	clearHashTable();
+	initHashKey(sideToMove);
     
     ptrChar = strstr(lineIn, "moves");
-
-    int count = 0;
-    if(ptrChar != NULL) {
-
-		u8 SIDE_TO_MOVE = WHITE;
-        
+	if(ptrChar != NULL) {
+	
 		ptrChar += 6;
         while(*ptrChar) {
             // parse Move
             
-            u32 move = parseMove(ptrChar, SIDE_TO_MOVE);
+            u32 move = parseMove(ptrChar, sideToMove);
             
             if(move == 0) {
                 break;
             }
 
-            count++;
             make_move(move);
+			//insertRepetitionHashKey(hashKey, sideToMove);
+			
             ply = 0;
             
+            sideToMove ^= 1;
+			
             while(*ptrChar && *ptrChar != ' ') {
                 ptrChar++;
             }
             
             ptrChar++;
-            SIDE_TO_MOVE ^= 1;
         }
-    } else {
-		
-		// safe check if "moves" command is not present 
-		color = WHITE;
-	}
+    }
 	
-    printf("\nMove count - %d\n", count);
-	
-	if(count % 2 == 0) {
-		color = WHITE;
-	} else {
-		color = BLACK;
-	}
+	color = sideToMove;
 	
     print_board(occupied);
 }
@@ -427,7 +231,7 @@ void parseGo(char *lineIn,  u8 sideToMove) {
 
 void UciLoop() {
     
-    char line[INPUTBUFFER];
+    char line[INPUT_BUFFER];
     quit = false;
     
     setbuf(stdin, NULL);
@@ -441,7 +245,7 @@ void UciLoop() {
         memset(&line[0], 0, sizeof(line));
         fflush(stdout);
         
-        if(!fgets(line, INPUTBUFFER, stdin)) {
+        if(!fgets(line, INPUT_BUFFER, stdin)) {
             continue;
         }
         
@@ -480,8 +284,10 @@ void UciLoop() {
             printf("id name %s\n", NAME);
             printf("id author Amar Thapa\n");
             printf("uciok\n");
-        }
-        
+        } else if(!strncmp(line, "perft", 5)) {
+			
+			startPerft(color, 7);
+		}
         if(quit) {
             break;
         }

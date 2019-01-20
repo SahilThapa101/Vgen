@@ -79,6 +79,7 @@ void readInput() {
     
     if(inputWaiting()) {
         stopped = true;
+		
         do {
             bytes = read(fileno(stdin), input, 256);
         } while(bytes < 0);

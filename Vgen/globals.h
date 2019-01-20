@@ -12,6 +12,8 @@
 #include <stdbool.h>
 #include <stdio.h>
 
+#define INPUT_BUFFER 400 * 6
+
 typedef unsigned char u8;
 typedef unsigned int u16;
 typedef unsigned long int u32;
@@ -47,6 +49,8 @@ u8 color;
 int depth;
 u64 nodes;
 
+u64 tbHits;
+
 /* pieceBB is an array containing bitboards for all pieces */
 
 #define MAX_SIDES 2
@@ -57,47 +61,82 @@ u64 pieceBB[2][MAX_PIECES]; /* color * (piece_type + pieces of that color) = 2 *
 
 /* array size for indexBB array */
 #define INDEX_BB_SIZE 64
-#define HASH_TABLE_SIZE 12000000
+#define HASH_TABLE_SIZE 8000000
 
 u64 index_bb[INDEX_BB_SIZE];
 
 // zobrist keys
-// MAX_PIECES - 2, excluding DUMMY and ALL PIECES
-u64 zobrist[MAX_PIECES - 2][MAX_SIDES][MAX_SQUARES];
+// MAX_PIECES, excluding DUMMY and ALL PIECES
+u64 hashKey;
+
+u64 zobrist[MAX_SIDES][MAX_PIECES][MAX_SQUARES];
 
 u64 KEY_BLACK_TO_MOVE;
+
+u64 KEY_FLAG_WHITE_CASTLE_QUEEN_SIDE;
+u64 KEY_FLAG_WHITE_CASTLE_KING_SIDE;
+u64 KEY_FLAG_BLACK_CASTLE_QUEEN_SIDE;
+u64 KEY_FLAG_BLACK_CASTLE_KING_SIDE;
+
+u64 KEY_EP_A_FILE;
+u64 KEY_EP_B_FILE;
+u64 KEY_EP_C_FILE;
+u64 KEY_EP_D_FILE;
+u64 KEY_EP_E_FILE;
+u64 KEY_EP_F_FILE;
+u64 KEY_EP_G_FILE;
+u64 KEY_EP_H_FILE;
+
 int VAL_UNKNOWN;
 
 #define hashfEXACT 0
 #define hashfALPHA 1
 #define hashfBETA 2
 
-typedef struct tagHASHE {
-    
-    u64 key; // 8 bytes
-    u32 move; // 4 bytes
-    int value; // 2 bytes
-    int depth; // 2 bytes
-    int flags; // 2 bytes
-} HASHE;
+// repetition hash table
+u64 repHashTable[2048];
+int repIndex;
 
-HASHE hashTable[HASH_TABLE_SIZE];
+int fiftyMoves;
 
 /********************************/
 
 #define MAX_PLY 1024
 int ply;
 
-struct History {
-    
-    // current state
-    u8 epFlag;
-    u64 epSquare;
+typedef struct {
+	
+	u32 move;
+	int score;
+} Move;
+
+typedef struct {
+      
     u8 castleFlags;
-    
-    //prev state
     u8 prevCastleFlags;
-} moveStack[MAX_PLY];
+	u8 epFlag;
+    u64 epSquare;
+} MOVE_STACK;
+
+typedef struct {
+    
+    u64 key; // 8 bytes
+    u32 move; // 4 bytes
+	char depth; // 2 bytes
+	int value;
+	u8 flags; // 2 bytes
+} HASHE;
+
+typedef struct {
+	u32 killerMove1;
+	u32 killerMove2;
+} KILLER;
+
+HASHE hashTable[HASH_TABLE_SIZE];
+MOVE_STACK moveStack[MAX_PLY];
+KILLER killerMoves[MAX_PLY];
+
+u64 historyScore[2][8][64];
 
 u8 rookCastleFlagMask[64];
 
@@ -110,15 +149,6 @@ u8 rookCastleFlagMask[64];
 #define WHITE_CASTLE_KING_SIDE 1
 #define BLACK_CASTLE_QUEEN_SIDE 2
 #define BLACK_CASTLE_KING_SIDE 3
-
-struct hist {
-    u64 move;
-    
-    u64 ep_sq;
-    u8 castle_flags;
-    u8 ep_flag;
-    
-} hist[MAX_PLY], hist_add;
 
 /********************************/
 u8 castling_rights[2];
@@ -173,6 +203,16 @@ u64 occupied, empty;
 
 #define NOT_A_FILE 0XFEFEFEFEFEFEFEFEU
 #define NOT_H_FILE 0X7F7F7F7F7F7F7F7FU
+
+#define A_FILE 0x101010101010101U
+#define B_FILE 0x202020202020202U
+#define C_FILE 0x404040404040404U
+#define D_FILE 0x808080808080808U
+#define E_FILE 0x1010101010101010U
+#define F_FILE 0x2020202020202020U
+#define G_FILE 0x4040404040404040U
+#define H_FILE 0x8080808080808080U 
+
 
 // uci
 bool quit;

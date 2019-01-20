@@ -15,33 +15,45 @@ typedef struct tagLINE {
     
     int cmove;              // Number of moves in the line.
     
-    u32 argmove[MAX_MOVES];  // The line.
+    u32 argmove[5000];  // The line.
     
 } LINE;
 
 void search(u8 color);
 
 // for alphabeta
-int alphabeta(u8 color, int depth, int alpha, int beta, int mate, LINE *pline);
+int alphabeta(u8 color, int depth, int alpha, int beta, int mate, LINE *pline, bool nullMove);
 
 int Quiescense(u8 color, int alpha, int beta);
 
-void MVV_LVA(u32 *moveList, u32 numberOfMoves);
+void MVV_LVA(Move *moveList, u8 numberOfMoves);
 
 void sortByLVA(u32 *moveList, int numberOfMoves);
 
-u64 getZobristKeyForPosition(void);
+int seeCapture(u32 move, u8 sideToMove);
 
-int ProbeHash(u8 color, int depth, int alpha, int beta, u32 *bestMove);
+//int see(u8 cPiece, u8 square, u8 sideToMove);
 
-void RecordHash(u8 color, int depth, int val, int hashf, u32 bestMove);
+u8 get_smallest_attacker(u8 square, u8 sideToMove, u8 *from);
 
-int sortByBestMoveFound(u32 *moveList, int count, u32 bestMove);
+int ProbeHash(u8 color, int depth, int alpha, int beta, Move *bestMove);
 
-int NegaMax(u8 color, int depth, int alpha, int beta, LINE *pline);
+void RecordHash(u8 color, int depth, int val, int hashf, Move bestMove);
 
-int NextGuess(int alpha, int beta, u8 subtreeCount);
+void makeCapture(u8 piece, u8 cPiece, u8 sideToMove, u8 from, u8 to);
 
-u32 BNS(u8 color, int depth, int alpha, int beta, LINE *pline);
+void unMakeCapture(u8 piece, u8 cPiece, u8 sideToMove, u8 from, u8 to);
+
+int see(u8 toSq, u8 cPiece, u8 frSq, u8 piece, u8 sideToMove);
+
+int seeOld(u8 cPiece, u8 square, u8 sideToMove);
+
+u64 attacksTo(u64 occupied, u8 square, u8 sideToMove);
+
+u64 getLeastValuablePiece(u64 attadef, u8 sideToMove, u8 *piece);
+
+u64 considerXrays(u64 occupied, u8 square);
+
+void debugSEE(u32 move, u8 sideToMove);
 
 #endif /* search_h */

@@ -12,5 +12,6 @@
 #include "globals.h"
 
 u64 perft(u8 depth, u8 color);
+void startPerft(u8 side, u8 depth);
 
 #endif /* perft_h */

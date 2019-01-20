@@ -13,31 +13,30 @@
 
 u32 createMove(u8 promotion_type, u8 castle_dir, u8 move_type, u8 color, u8 c_piece, u8 piece, u8 from, u8 to);
 
-u8 genCaptures(u32 *move_list, u8 color);
+u8 genMoves(Move *move_list, u8 color);
+u8 genAttacksQuies(Move *moveList, u8 sideToMove);
 
-u8 genMoves(u32 *move_list, u8 color);
+u8 genPushes(Move *move_list, u8 pos, u8 color);
+u8 genAttacks(Move *move_list, u8 pos, u8 color);
 
-u8 genPushes(u32 *move_list, u8 pos, u8 color);
-u8 genAttacks(u32 *move_list, u8 pos, u8 color);
-u8 genSpecialMoves(u32 *move_list, u8 pos, u8 color);
+u8 genKingPushes(Move *move_list, u8 pos, u8 color);
+u8 genQueenPushes(Move *move_list, u8 pos, u8 color);
+u8 genBishopPushes(Move *move_list, u8 pos, u8 color);
+u8 genKnightPushes(Move *move_list, u8 pos, u8 color);
+u8 genRookPushes(Move *move_list, u8 pos, u8 color);
+u8 genPawnPushes(Move *move_list, u8 pos, u8 color);
 
-u8 genKingPushes(u32 *move_list, u8 pos, u8 color);
-u8 genQueenPushes(u32 *move_list, u8 pos, u8 color);
-u8 genBishopPushes(u32 *move_list, u8 pos, u8 color);
-u8 genKnightPushes(u32 *move_list, u8 pos, u8 color);
-u8 genRookPushes(u32 *move_list, u8 pos, u8 color);
-u8 genPawnPushes(u32 *move_list, u8 pos, u8 color);
+u8 genKingAttacks(Move *move_list, u8 pos, u8 color);
+u8 genQueenAttacks(Move *move_list, u8 pos, u8 color);
+u8 genBishopAttacks(Move *move_list, u8 pos, u8 color);
+u8 genKnightAttacks(Move *move_list, u8 pos, u8 color);
+u8 genRookAttacks(Move *move_list, u8 pos, u8 color);
+u8 genPawnAttacks(Move *move_list, u8 pos, u8 color);
 
-u8 genKingAttacks(u32 *move_list, u8 pos, u8 color);
-u8 genQueenAttacks(u32 *move_list, u8 pos, u8 color);
-u8 genBishopAttacks(u32 *move_list, u8 pos, u8 color);
-u8 genKnightAttacks(u32 *move_list, u8 pos, u8 color);
-u8 genRookAttacks(u32 *move_list, u8 pos, u8 color);
-u8 genPawnAttacks(u32 *move_list, u8 pos, u8 color);
-
-u8 genDoublePushes(u32 *move_list, u8 pos, u8 color);
-u8 genCastlingMoves(u32 *move_list, u8 pos, u8 color);
-u8 genEnpassantMoves(u32 *move_list, u8 pos, u8 color);
-u8 genPromotions(u32 *move_list, u8 pos, u8 color);
+u8 genDoublePushes(Move *move_list, u8 pos, u8 color);
+u8 genCastlingMoves(Move *move_list, u8 pos, u8 color);
+u8 genEnpassantMoves(Move *move_list, u8 pos, u8 color);
+u8 genPromotionsNormal(Move *moveList, u8 pos, u8 sideToMove);
+u8 genPromotionsAttacks(Move *move_list, u8 pos, u8 sideToMove);
 
 #endif /* movegen_h */
