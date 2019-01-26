@@ -13,11 +13,11 @@
 
 void initZobristKeys() {
     
-    for(int i = 0; i < 2; i++) {
+    for(u8 i = 0; i < 2; i++) {
     
-        for(int j = 0; j < 8; j++) {
+        for(u8 j = 0; j < 8; j++) {
                 
-            for(int k = 0; k < 64; k++) {
+            for(u8 k = 0; k < 64; k++) {
                 
 				zobrist[i][j][k] = rand64();
             }

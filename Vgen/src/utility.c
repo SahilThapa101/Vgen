@@ -576,14 +576,14 @@ void checkUp() {
     readInput();
 }
 
-void initHashKey(u8 sideToMove) {
+void initHashKey() {
 	
 	u64 bitboard;
 	
 	hashKey = 0ULL;
-    for(int i = 0; i < 2; i++) {
+    for(u8 i = 0; i < 2; i++) {
     
-        for(int j = PAWNS; j <= KING; j++) {
+        for(u8 j = PAWNS; j <= KING; j++) {
             
             bitboard = pieceBB[i][j];
             while (bitboard) {
@@ -596,11 +596,6 @@ void initHashKey(u8 sideToMove) {
 	
 	hashKey ^= KEY_FLAG_WHITE_CASTLE_QUEEN_SIDE ^ KEY_FLAG_WHITE_CASTLE_KING_SIDE;
 	hashKey ^= KEY_FLAG_BLACK_CASTLE_QUEEN_SIDE ^ KEY_FLAG_BLACK_CASTLE_KING_SIDE;
-	
-	if(sideToMove) {
-		
-		hashKey ^= KEY_BLACK_TO_MOVE;
-	}
 }
 
 void clearHashTable() {
@@ -622,7 +617,7 @@ void clearRepetitionHashTable() {
 		repHashTable[i] = 0ULL;
 	}
 	
-	repIndex = 0;
+	repIndex = -1;
 	fiftyMoves = 0;
 }
 
@@ -636,9 +631,9 @@ void clearKillerMovesTable() {
 
 void clearHistoryTable() {
 	
-	for(int i = 0; i < 2; i++) {
-		for(int j = 0; j < 8; j++) {
-			for(int k = 0; k < 64; k++) {
+	for(u8 i = 0; i < 2; i++) {
+		for(u8 j = 0; j < 8; j++) {
+			for(u8 k = 0; k < 64; k++) {
 	
 				historyScore[i][j][k] = 0ULL;
 			}

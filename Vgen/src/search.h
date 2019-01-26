@@ -22,9 +22,9 @@ typedef struct tagLINE {
 void search(u8 color);
 
 // for alphabeta
-int alphabeta(u8 color, int depth, int alpha, int beta, int mate, LINE *pline, bool nullMove);
+int alphabeta(u8 sideToMove, char depth, int alpha, int beta, int mate, LINE *pline, bool nullMove);
 
-int Quiescense(u8 color, int alpha, int beta);
+int Quiescense(u8 sideToMove, int alpha, int beta);
 
 void MVV_LVA(Move *moveList, u8 numberOfMoves);
 
@@ -32,17 +32,7 @@ void sortByLVA(u32 *moveList, int numberOfMoves);
 
 int seeCapture(u32 move, u8 sideToMove);
 
-//int see(u8 cPiece, u8 square, u8 sideToMove);
-
 u8 get_smallest_attacker(u8 square, u8 sideToMove, u8 *from);
-
-int ProbeHash(u8 color, int depth, int alpha, int beta, Move *bestMove);
-
-void RecordHash(u8 color, int depth, int val, int hashf, Move bestMove);
-
-void makeCapture(u8 piece, u8 cPiece, u8 sideToMove, u8 from, u8 to);
-
-void unMakeCapture(u8 piece, u8 cPiece, u8 sideToMove, u8 from, u8 to);
 
 int see(u8 toSq, u8 cPiece, u8 frSq, u8 piece, u8 sideToMove);
 

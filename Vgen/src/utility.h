@@ -40,7 +40,7 @@ void checkUp(void);
 void clearHashTable(void);
 void clearRepetitionHashTable(void);
 void clearKillerMovesTable(void);
-void initHashKey(u8 sideToMove);
+void initHashKey(void);
 void clearHistoryTable();
 void clearCounterMoveHistoryTable();
 

@@ -106,8 +106,10 @@ u8 genAttacks(Move *moveList, u8 pos, u8 sideToMove) {
 		cPiece = cPieceType(moveList[i].move);
 
 		if(pieceVal[aPiece] > pieceVal[cPiece]){
+			
 			moveList[i].score = seeCapture(moveList[i].move, sideToMove);
 		} else {
+			
 			moveList[i].score = pieceVal[cPiece] - pieceVal[aPiece];
 		}
 	}
@@ -908,7 +910,7 @@ u8 genPromotionsAttacks(Move *moveList, u8 pos, u8 sideToMove) {
         
         if (sideToMove == WHITE) {
             
-            toAttack = (((fromBB << 7) & NOT_H_FILE)    | ((fromBB << 9) & NOT_A_FILE));
+            toAttack = (((fromBB << 7) & NOT_H_FILE) | ((fromBB << 9) & NOT_A_FILE));
         } else {
             
             toAttack = (((fromBB >> 7) & NOT_A_FILE) | ((fromBB >> 9) & NOT_H_FILE));

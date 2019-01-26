@@ -61,7 +61,7 @@ u64 pieceBB[2][MAX_PIECES]; /* color * (piece_type + pieces of that color) = 2 *
 
 /* array size for indexBB array */
 #define INDEX_BB_SIZE 64
-#define HASH_TABLE_SIZE 8000000
+#define HASH_TABLE_SIZE 10000000
 
 u64 index_bb[INDEX_BB_SIZE];
 
@@ -96,8 +96,8 @@ int VAL_UNKNOWN;
 // repetition hash table
 u64 repHashTable[2048];
 int repIndex;
-
 int fiftyMoves;
+int tempFiftyMoves;
 
 /********************************/
 
@@ -212,7 +212,6 @@ u64 occupied, empty;
 #define F_FILE 0x2020202020202020U
 #define G_FILE 0x4040404040404040U
 #define H_FILE 0x8080808080808080U 
-
 
 // uci
 bool quit;

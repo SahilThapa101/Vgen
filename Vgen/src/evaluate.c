@@ -291,9 +291,9 @@ int getMobility(u8 sideToMove) {
 int pSqTScore(u8 sideToMove) {
 	int score = 0;
 	
-	int count = popCount(occupied ^ (pieceBB[sideToMove ^ 1][PAWNS]));
+	int count = popCount(occupied);
 	
-	if(count < 5) {
+	if(count <= 16) {
 		if(sideToMove) {
 			
 			score += bKE_PSqT[bitScanForward(pieceBB[sideToMove][KING])];

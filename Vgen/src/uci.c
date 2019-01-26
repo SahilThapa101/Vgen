@@ -20,7 +20,7 @@
 #include "perft.h"
 #include "hash.h"
 
-#define NAME "Vgen_20190120"
+#define NAME "Vgen_20190125"
 #define START_FEN "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
 
 int addFileNumber(char ch) {
@@ -97,8 +97,11 @@ u32 parseMove(char *ptrChar, u8 sideToMove) {
 }
 
 void parsePosition(char* lineIn) {
-    
-	u8 sideToMove = WHITE;
+
+	clearKillerMovesTable();
+	clearHistoryTable();
+	clearHashTable();
+	clearRepetitionHashTable();
 
     lineIn += 9;
     char *ptrChar = lineIn;
@@ -106,7 +109,8 @@ void parsePosition(char* lineIn) {
         
         parseFen(START_FEN);
     } else {
-        ptrChar = strstr(lineIn, "fen");
+ 
+		ptrChar = strstr(lineIn, "fen");
         if(ptrChar == NULL) {
             
             parseFen(START_FEN);
@@ -117,28 +121,28 @@ void parsePosition(char* lineIn) {
         }
     }
 	
-	//clearRepetitionHashTable();
-	clearKillerMovesTable();
-	clearHistoryTable();
-	clearHashTable();
-	initHashKey(sideToMove);
+	initHashKey();
     
-    ptrChar = strstr(lineIn, "moves");
+	ptrChar = strstr(lineIn, "moves");
+	
+	u8 sideToMove = WHITE;
+
 	if(ptrChar != NULL) {
 	
 		ptrChar += 6;
         while(*ptrChar) {
+
             // parse Move
-            
             u32 move = parseMove(ptrChar, sideToMove);
             
             if(move == 0) {
                 break;
             }
 
+            // add game history hashKeys to repetitions hash table
+            insertRepetitionHashKey(hashKey, sideToMove);
             make_move(move);
-			//insertRepetitionHashKey(hashKey, sideToMove);
-			
+
             ply = 0;
             
             sideToMove ^= 1;
@@ -275,7 +279,8 @@ void UciLoop() {
 			
             parsePosition("position startpos\n");
         } else if(!strncmp(line, "go", 2)) {
-            parseGo(line, color);
+           
+		    parseGo(line, color);
         } else if(!strncmp(line, "quit", 4)) {
           
             quit = true;
