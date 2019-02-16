@@ -51,7 +51,8 @@ int main(int argc, char **argv) {
     init_magic_moves();
     initCastleMaskAndFlags();
     initZobristKeys();
-    
+    initTableDoublePawns();
+	  
     timeSet = false;
     stopped = false;
     

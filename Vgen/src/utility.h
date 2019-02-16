@@ -44,4 +44,40 @@ void initHashKey(void);
 void clearHistoryTable();
 void clearCounterMoveHistoryTable();
 
+u64 soutOne (u64 b);
+u64 nortOne (u64 b);
+u64 eastOne (u64 b);
+u64 westOne (u64 b);
+u64 noEaOne (u64 b);
+u64 soEaOne (u64 b);
+u64 soWeOne (u64 b);
+u64 noWeOne (u64 b);
+u64 wFrontSpans(u64 wpawns);
+u64 bRearSpans (u64 bpawns);
+u64 bFrontSpans(u64 bpawns);
+u64 wRearSpans (u64 wpawns);
+u64 nortFill(u64 gen);
+u64 soutFill(u64 gen);
+u64 wFrontFill(u64 wpawns);
+u64 wRearFill (u64 wpawns);
+u64 bFrontFill(u64 bpawns);
+u64 bRearFill (u64 bpawns);
+u64 fileFill(u64 gen);
+u64 wEastAttackFrontSpans (u64 wpawns);
+u64 wWestAttackFrontSpans (u64 wpawns);
+u64 bEastAttackFrontSpans (u64 bpawns);
+u64 bWestAttackFrontSpans (u64 bpawns);
+u64 wEastAttackRearSpans (u64 wpawns);
+u64 wWestAttackRearSpans (u64 wpawns);
+u64 bEastAttackRearSpans (u64 bpawns);
+u64 bWestAttackRearSpans (u64 bpawns);
+u64 eastAttackFileFill (u64 pawns);
+u64 westAttackFileFill (u64 pawns);
+u64 wPawnEastAttacks(u64 wpawns);
+u64 wPawnWestAttacks(u64 wpawns);
+u64 bPawnEastAttacks(u64 bpawns);
+u64 bPawnWestAttacks(u64 bpawns);
+
+
+
 #endif /* utility_h */

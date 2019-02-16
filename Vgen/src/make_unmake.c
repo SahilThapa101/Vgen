@@ -45,7 +45,7 @@ void make_move(u32 move) {
 
 		hashKey ^= zobrist[sideToMove][piece][fromSq] ^ zobrist[sideToMove][piece][toSq];
 
-		if (piece == KING && (fromSq == 4 || fromSq == 60)) {
+		if (piece == KING) {
 			if (sideToMove == WHITE) {
 
 				int castleQueenSide = moveStack[ply].castleFlags & CastleFlagWhiteQueen;
@@ -77,7 +77,7 @@ void make_move(u32 move) {
 					hashKey ^= KEY_FLAG_BLACK_CASTLE_KING_SIDE;
 				}
 			}
-		} else if (piece == ROOKS && (fromSq == 0 || fromSq == 7 || fromSq == 56 || fromSq == 63)) {
+		} else if (piece == ROOKS) {
 
 			if (fromSq == 0
 					&& (moveStack[ply].castleFlags & CastleFlagWhiteQueen)) {

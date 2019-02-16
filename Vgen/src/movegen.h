@@ -18,6 +18,7 @@ u8 genAttacksQuies(Move *moveList, u8 sideToMove);
 
 u8 genPushes(Move *move_list, u8 pos, u8 color);
 u8 genAttacks(Move *move_list, u8 pos, u8 color);
+u8 genSpecialMoves(Move *moveList, u8 pos, u8 sideToMove);
 
 u8 genKingPushes(Move *move_list, u8 pos, u8 color);
 u8 genQueenPushes(Move *move_list, u8 pos, u8 color);

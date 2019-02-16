@@ -120,10 +120,10 @@ void splitTheFEN(char *str) {
     
     char* checkCastleFlags = ((char*) (d_array->buffer[2]));
     
+	u8 flag = 0;    
     if (strcmp(checkCastleFlags, "-") != 0) {
         
         u32 len = strlen(checkCastleFlags);
-        u8 flag = 0;
         
         for (int i = 0; i < len; i++) {
             if (checkCastleFlags[i] == 'K') {
@@ -139,18 +139,22 @@ void splitTheFEN(char *str) {
                 
                 flag |= CastleFlagBlackQueen;
             }
-        }
-        
-        moveStack[0].castleFlags = flag;
-        moveStack[0].prevCastleFlags = flag;
+        }    
     }
+	
+	moveStack[0].castleFlags = flag;
+    moveStack[0].prevCastleFlags = flag;
     
     char* checkEpSquare = ((char*) (d_array->buffer[3]));
     
     if (checkEpSquare[0] != '-') {
-        moveStack[0].epFlag = 1;
+        
+		moveStack[0].epFlag = 1;
         moveStack[0].epSquare = bbFromAlgebricPos(checkEpSquare);
-    }
+    } else {
+		
+	    moveStack[0].epFlag = 0;
+	}
     
     printf("Side to move : %s\n", COLOR == 0 ? "WHITE" : "BLACK");
     

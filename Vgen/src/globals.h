@@ -100,6 +100,11 @@ int fiftyMoves;
 int tempFiftyMoves;
 
 /********************************/
+//evaluation
+
+#define FLIP_TB(sq) ((sq)^0x38) // Flip top-to-bottom (A8==A1, A7==A2 etc.)
+#define NUMBER_OF_TBLS  12
+
 
 #define MAX_PLY 1024
 int ply;
@@ -212,6 +217,10 @@ u64 occupied, empty;
 #define F_FILE 0x2020202020202020U
 #define G_FILE 0x4040404040404040U
 #define H_FILE 0x8080808080808080U 
+
+// evaluation
+
+u64 arrayTableDoublePawns[8];
 
 // uci
 bool quit;

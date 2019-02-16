@@ -26,13 +26,22 @@
 
 #define SCORE_PV_MOVE 30000
 #define SCORE_HASH_MOVE 25000
+#define SCORE_PROMOTION_MOVE 20005
 #define SCORE_GOOD_CAPTURE_MOVE 20000
-#define SCORE_PROMOTION_MOVE 15000
-#define SCORE_KILLER_MOVE 10000
-#define SCORE_NORMAL_MOVE 7000
+#define SCORE_KILLER_MOVE 15000
+#define SCORE_ENPASSANT_MOVE 12000
+#define SCORE_CASTLE_MOVE 10000
+#define SCORE_DOUBLE_PUSH_MOVE 7000
+#define SCORE_NORMAL_MOVE 5000
 #define SCORE_BAD_CAPTURE_MOVE 3000
 
+#define FALSE 0
+#define TRUE 1
+
 const int INFINITY = 30000;
+
+int futility_margin[4] = { 150, 250, 400, 600 };
+int seeVal[8] = { 0, 100, 300, 300, 500, 900, 2000, 0 };
 
 #ifndef piece_name
 char pieceName[2][8] = { { ' ', (char) 0, 'N', 'B', 'R', 'Q', 'K', '\0' }, {
@@ -56,7 +65,7 @@ void search(u8 sideToMove) {
 	int score;
 
 	pvMove = 0UL;
-	while (1) {
+	while (TRUE) {
 
 		ply = 0;
 		LINE mainline;
@@ -149,10 +158,63 @@ void search(u8 sideToMove) {
 	stopped = false;
 }
 
-int futility_margin[4] = { 150, 250, 400, 600 };
-int seeVal[8] = { 0, 100, 300, 300, 500, 900, 2000, 0 };
-int alphabeta(u8 sideToMove, char depth, int alpha, int beta, int mate,
-		LINE *pline, bool nullMove) {
+void sortMoves(Move *moveList, u8 sideToMove, u8 numberOfMoves, u32 bestMove, u32 killerMove1, u32 killerMove2) {
+
+	u8 moveType;
+	for (u8 i = 0; i < numberOfMoves; i++) {
+
+			moveType = move_type(moveList[i].move);
+			if (moveList[i].move == pvMove) {
+
+				moveList[i].score = SCORE_PV_MOVE;
+			} else if (moveList[i].move == bestMove) {
+
+				moveList[i].score = SCORE_HASH_MOVE;
+			} else if (moveType == MOVE_CAPTURE) {
+				if (moveList[i].score >= 0) {
+
+					moveList[i].score = SCORE_GOOD_CAPTURE_MOVE + moveList[i].score * 0.5;
+				} else {
+
+					moveList[i].score = SCORE_BAD_CAPTURE_MOVE + moveList[i].score * 0.5;
+				}
+			} else if (moveType == MOVE_PROMOTION) {
+
+				moveList[i].score += SCORE_PROMOTION_MOVE;
+			} else if (moveList[i].move == killerMove1 || moveList[i].move == killerMove2) {
+
+				moveList[i].score = SCORE_KILLER_MOVE;
+			} else if(moveType == MOVE_ENPASSANT) {
+				
+				moveList[i].score = SCORE_ENPASSANT_MOVE;
+			} else if(moveType == MOVE_CASTLE) {
+				
+				moveList[i].score = SCORE_CASTLE_MOVE;
+			} else if(moveType == MOVE_DOUBLE_PUSH) {
+				
+				moveList[i].score = SCORE_DOUBLE_PUSH_MOVE;
+			} else if(moveType == MOVE_NORMAL) {
+				
+				moveList[i].score = SCORE_NORMAL_MOVE + 
+					historyScore[sideToMove][pieceType(moveList[i].move)][to_sq(moveList[i].move)] * 0.10; 
+			}
+		}
+
+		Move move;
+		for (u8 i = 0; i < numberOfMoves; i++) {
+			for (u8 j = i + 1; j < numberOfMoves; j++) {
+
+				if (moveList[i].score < moveList[j].score) {
+
+					move = moveList[i];
+					moveList[i] = moveList[j];
+					moveList[j] = move;
+				}
+			}
+		}
+}
+
+int alphabeta(u8 sideToMove, char depth, int alpha, int beta, int mate, LINE *pline, bool nullMove) {
 
 	assert(beta > alpha);
 
@@ -194,6 +256,7 @@ int alphabeta(u8 sideToMove, char depth, int alpha, int beta, int mate,
 		return value;
 	}
 
+	LINE line;
 	if (nullMove) {
 		if (!isKingInCheck(sideToMove) && popCount(occupied) > 16) {
 
@@ -204,11 +267,12 @@ int alphabeta(u8 sideToMove, char depth, int alpha, int beta, int mate,
 			moveStack[ply].epSquare = 0;
 			moveStack[ply].castleFlags = moveStack[ply - 1].castleFlags;
 
-			int nullScore = -alphabeta(sideToMove ^ 1, depth - 1 - R, -beta,
-					-beta + 1, mate - 1, &nullLine, false);
+			int nullScore = -alphabeta(sideToMove ^ 1, depth - 1 - R, -beta, -beta + 1, mate - 1, &nullLine, false);
 
 			if (nullScore >= beta) {
 				ply--;
+
+				RecordHash(sideToMove, depth, beta, hashfBETA, bestMove, hashKey);
 
 				removeRepetitionHashKey();
 				return beta;
@@ -218,7 +282,6 @@ int alphabeta(u8 sideToMove, char depth, int alpha, int beta, int mate,
 		}
 	}
 
-	LINE line;
 	nodes++;
 
 	ply++;
@@ -228,61 +291,19 @@ int alphabeta(u8 sideToMove, char depth, int alpha, int beta, int mate,
 
 	int numberOfMoves;
 	Move moveList[MAX_MOVES];
-
 	numberOfMoves = genMoves(moveList, sideToMove);
 
 	u32 killerMove1 = killerMoves[ply].killerMove1;
 	u32 killerMove2 = killerMoves[ply].killerMove2;
 
-	u32 checkMove;
-	for (int i = 0; i < numberOfMoves; i++) {
+	// sort moves generated
+	sortMoves(&moveList, sideToMove, numberOfMoves, bestMove.move, killerMove1, killerMove2);
 
-		checkMove = moveList[i].move;
-
-		if (checkMove == pvMove) {
-
-			moveList[i].score = SCORE_PV_MOVE;
-		} else if (checkMove == bestMove.move) {
-
-			moveList[i].score = SCORE_HASH_MOVE;
-		} else if (move_type(checkMove) == MOVE_CAPTURE
-				|| move_type(checkMove) == MOVE_ENPASSANT) {
-			if (moveList[i].score >= 0) {
-
-				moveList[i].score += SCORE_GOOD_CAPTURE_MOVE;
-			} else {
-
-				moveList[i].score += SCORE_BAD_CAPTURE_MOVE;
-			}
-		} else if (move_type(checkMove) == MOVE_PROMOTION) {
-
-			// before equal captures
-			moveList[i].score = SCORE_PROMOTION_MOVE;
-		} else if (checkMove == killerMove1 || checkMove == killerMove2) {
-
-			moveList[i].score = SCORE_KILLER_MOVE;
-		} else {
-
-			moveList[i].score = SCORE_NORMAL_MOVE;
-		}
-	}
-
-	Move move;
-	for (int i = 0; i < numberOfMoves; i++) {
-		for (int j = i + 1; j < numberOfMoves; j++) {
-
-			if (moveList[i].score < moveList[j].score) {
-
-				move = moveList[i];
-				moveList[i] = moveList[j];
-				moveList[j] = move;
-			}
-		}
-	}
-
+	int val = 0;
 	int legalMoves = 0;
 	int movesSearched = 0;
 	bool isLmr = false;
+	Move move;
 	for (int i = 0; i < numberOfMoves; i++) {
 
 		move = moveList[i];
@@ -292,11 +313,9 @@ int alphabeta(u8 sideToMove, char depth, int alpha, int beta, int mate,
 
 			legalMoves++;
 
-			int val;
-			int moveType = move_type(move.move);
-			if (moveType == MOVE_NORMAL || moveType == MOVE_DOUBLE_PUSH || moveType == MOVE_CASTLE) {
+			if(move_type(move.move) == MOVE_NORMAL) {
 
-					// futility pruning
+				// futility pruning
 				if (depth > 5 && movesSearched > 0) {
 					if (!isKingInCheck(sideToMove ^ 1)) {
 						if ((evaluate(sideToMove) + futility_margin[depth - 1]) < alpha) {
@@ -308,45 +327,45 @@ int alphabeta(u8 sideToMove, char depth, int alpha, int beta, int mate,
 				}
 
 				// Late Move Reduction
-				if (movesSearched > 4 && depth > 3 && move.score < SCORE_KILLER_MOVE) {
-					if (!isKingInCheck(sideToMove ^ 1)) {
+				if (depth > 3 && movesSearched > 4) {
+					if (!isKingInCheck(sideToMove ^ 1) && pieceType(move.move) != PAWNS) {
 
-						int reduce = (depth < 12) ? 1 : 2;
-						val = -alphabeta(sideToMove ^ 1, depth - 1 - reduce, -alpha - 1, -alpha, mate - 1, &line, true);
 						isLmr = true;
+						int reduce = (depth < 12) ? 1 : 2;
+
+						val = -alphabeta(sideToMove ^ 1, depth - 1 - reduce, -alpha - 1, -alpha, mate - 1, &line, true);
+						if (val > alpha) {
+
+							// Normal Alpha Beta Search
+							val = -alphabeta(sideToMove ^ 1, depth - 1, -beta, -alpha, mate - 1, &line, true);
+						}
 					}
 				}
 			}
-
-			if(isLmr) {
-
-				isLmr = false;
-				if(val > alpha) {
-					// Lmr failed, research
-					val = -alphabeta(sideToMove ^ 1, depth - 1, -beta, -alpha, mate - 1, &line, true);
-				}
-			} else {
-
-				// Normal Alpha Beta Search
-				val = -alphabeta(sideToMove ^ 1, depth - 1, -beta, -alpha, mate - 1, &line, true);
+			
+			if(!isLmr) {
+				
+				val = -alphabeta(sideToMove ^ 1, depth - 1, -beta, -alpha, mate - 1, &line, true);	
 			}
+			
+			isLmr = false;
 
 			movesSearched++;
-
 			unmake_move(move.move);
 
 			if (stopped) {
+
 				return 0;
 			}
 
 			if (val >= beta) {
 
 				RecordHash(sideToMove, depth, beta, hashfBETA, move, hashKey);
-				if (moveType == MOVE_NORMAL || moveType == MOVE_DOUBLE_PUSH || moveType == MOVE_CASTLE) {
+				if (move_type(move.move) == MOVE_NORMAL) {
 
-					if (move.move != killerMoves[ply].killerMove1) {
+					if (move.move != killerMove1) {
 
-						killerMoves[ply].killerMove2 = killerMoves[ply].killerMove1;
+						killerMoves[ply].killerMove2 = killerMove1;
 						killerMoves[ply].killerMove1 = move.move;
 					}
 
@@ -363,7 +382,6 @@ int alphabeta(u8 sideToMove, char depth, int alpha, int beta, int mate,
 			if (val > alpha) {
 
 				alpha = val;
-
 				hashf = hashfEXACT;
 				bestMove = move;
 
@@ -382,6 +400,7 @@ int alphabeta(u8 sideToMove, char depth, int alpha, int beta, int mate,
 	}
 
 	if (legalMoves == 0) {
+
 		bestMove.move = 0ULL;
 		if (!isKingInCheck(sideToMove)) {
 
@@ -399,6 +418,7 @@ int alphabeta(u8 sideToMove, char depth, int alpha, int beta, int mate,
 	ply--;
 
 	removeRepetitionHashKey();
+
 	return alpha;
 }
 
@@ -440,24 +460,6 @@ int Quiescense(u8 sideToMove, int alpha, int beta) {
 		moveList[i].score = seeCapture(moveList[i].move, sideToMove);
 	}
 
-	/* for (int i = 0; i < (numberOfCaptures - 1); i++) {
-	 int position = i;
-
-	 for (int j = i + 1; j < numberOfCaptures; j++) {
-
-	 if (moveList[i].score < moveList[j].score) {
-	 position = j;
-	 }
-	 }
-
-	 if (position != i) {
-
-	 move = moveList[i];
-	 moveList[i] = moveList[position];
-	 moveList[position] = move;
-	 }
-	 } */
-
 	Move move;
 	for (int i = 0; i < numberOfCaptures; i++) {
 		for (int j = i + 1; j < numberOfCaptures; j++) {
@@ -473,13 +475,14 @@ int Quiescense(u8 sideToMove, int alpha, int beta) {
 
 	for (int i = 0; i < numberOfCaptures; i++) {
 
-		if (moveList[i].score >= 0) {
+		//if (moveList[i].score >= 0) {
 
 			// delta pruning
-			if ((standingPat + seeVal[cPieceType(moveList[i].move)] + 100) < alpha) {
-
-				continue;
-			}
+//			if (cPieceType(moveList[i].move) != DUMMY &&
+//					((standingPat + seeVal[cPieceType(moveList[i].move)] + 100) < alpha)) {
+//
+//				continue;
+//			}
 
 			make_move(moveList[i].move);
 			if (!isKingInCheck(sideToMove)) {
@@ -499,7 +502,7 @@ int Quiescense(u8 sideToMove, int alpha, int beta) {
 			} else {
 				unmake_move(moveList[i].move);
 			}
-		}
+		//}
 	}
 
 	removeRepetitionHashKey();
@@ -508,16 +511,12 @@ int Quiescense(u8 sideToMove, int alpha, int beta) {
 
 int seeCapture(u32 move, u8 sideToMove) {
 
-	int value = 0;
-
 	u8 from = from_sq(move);
 	u8 to = to_sq(move);
 	u8 piece = pieceType(move);
 	u8 cPiece = cPieceType(move);
 
-	value = see(to, cPiece, from, piece, sideToMove);
-
-	return value;
+	return see(to, cPiece, from, piece, sideToMove);
 }
 
 void debugSEE(u32 move, u8 sideToMove) {
@@ -542,8 +541,32 @@ int see(u8 toSq, u8 cPiece, u8 frSq, u8 aPiece, u8 sideToMove) {
 	u64 fromSet = 1ULL << frSq;
 	u64 occ = occupied;
 
-	swapList[0] = seeVal[cPiece];
 	occ ^= fromSet;
+
+	swapList[0] = 0;
+
+	// Handle en-passant
+	
+	// See for promoting pawns
+	/* if(aPiece == PAWNS && (sideToMove ? fromSet & RANK_2 : fromSet & RANK_7)) {
+		
+		if(cPiece != DUMMY) {
+
+			swapList[0] = seeVal[cPiece];
+		}
+
+		swapList[0] += seeVal[QUEEN] - seeVal[PAWNS];
+		cPiece = QUEEN;
+	} else {
+
+		swapList[0] = seeVal[cPiece];
+		cPiece = aPiece;
+	} */
+	
+	swapList[0] = seeVal[cPiece];
+	cPiece = aPiece;
+	
+	assert(swapList[0] > 0);
 
 	u8 side = sideToMove ^ 1;
 
@@ -560,20 +583,16 @@ int see(u8 toSq, u8 cPiece, u8 frSq, u8 aPiece, u8 sideToMove) {
 	u64 bishops = pieceBB[WHITE][BISHOPS] | pieceBB[BLACK][BISHOPS];
 	u64 queens = pieceBB[WHITE][QUEEN] | pieceBB[BLACK][QUEEN];
 
-	cPiece = aPiece;
-
 	do {
 
-		for (aPiece = PAWNS;
-				!(fromSet = (sideToMoveAttackers & pieceBB[side][aPiece]));
-				aPiece++) {
+		for (aPiece = PAWNS; !(fromSet = (sideToMoveAttackers & pieceBB[side][aPiece])); aPiece++) {
+
 			assert(aPiece < KING);
 		}
 
 		occ ^= (fromSet & -fromSet);
 
-		attackers |= ((rooks | queens) & Rmagic(toSq, occ))
-						| ((bishops | queens) & Bmagic(toSq, occ));
+		attackers |= ((rooks | queens) & Rmagic(toSq, occ)) | ((bishops | queens) & Bmagic(toSq, occ));
 		attackers &= occ;
 
 		swapList[index] = -swapList[index - 1] + seeVal[cPiece];
@@ -593,9 +612,11 @@ int see(u8 toSq, u8 cPiece, u8 frSq, u8 aPiece, u8 sideToMove) {
 	} while (sideToMoveAttackers);
 
 	while (--index) {
-		if (-swapList[index] < swapList[index - 1]) {
-			swapList[index - 1] = -swapList[index];
-		}
+	
+		if(swapList[index - 1] > -swapList[index]) {
+			
+			swapList[index - 1] = -swapList[index]; 
+		}		
 	}
 
 	return swapList[0];

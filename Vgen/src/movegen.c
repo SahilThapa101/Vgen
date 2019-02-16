@@ -21,66 +21,31 @@ u8 genMoves(Move *moveList, u8 sideToMove) {
     
     pos = genAttacks(moveList, pos, sideToMove);
 	pos = genPushes(moveList, pos, sideToMove);
-    
+    pos = genSpecialMoves(moveList, pos, sideToMove);
+	
     return pos;
+}
+
+u8 genSpecialMoves(Move *moveList, u8 pos, u8 sideToMove) {
+	
+    pos = genDoublePushes(moveList, pos, sideToMove);  
+	pos = genPromotionsNormal(moveList, pos, sideToMove);
+    pos = genCastlingMoves(moveList, pos, sideToMove);
+	
+	return pos;
 }
 
 u8 genPushes(Move *moveList, u8 pos, u8 sideToMove) {
 	
 	int start = pos;
 	
-	pos = genPromotionsNormal(moveList, pos, sideToMove);
-    pos = genCastlingMoves(moveList, pos, sideToMove);
     pos = genKnightPushes(moveList, pos, sideToMove);
     pos = genBishopPushes(moveList, pos, sideToMove);
 	pos = genRookPushes(moveList, pos, sideToMove);
     pos = genQueenPushes(moveList, pos, sideToMove);
     pos = genPawnPushes(moveList, pos, sideToMove);
-    pos = genDoublePushes(moveList, pos, sideToMove);  
 	pos = genKingPushes(moveList, pos, sideToMove);
-	
-	int position;
-	int score1;
-	int score2;
-	Move move;
-	
-	for(int i = start; i < pos; i++) {
-		
-		score1 = historyScore[sideToMove][pieceType(moveList[i].move)][to_sq(moveList[i].move)];
-		for(int j = i + 1; j < pos; j++) {
-			
-			score2 = historyScore[sideToMove][pieceType(moveList[j].move)][to_sq(moveList[j].move)];
-			if(score1 < score2) {
-				
-				move = moveList[i];
-				moveList[i] = moveList[j];
-				moveList[j] = move;
-			}
-		}
-	}	
-	
-/* 	for (int i = start; i < (pos - 1); i++) {
-		position = i;
-		
-		score1 = historyScore[sideToMove][pieceType(moveList[i].move)][to_sq(moveList[i].move)];
-			
-		for (int j = i + 1; j < pos; j++) {
-			
-			score2 = historyScore[sideToMove][pieceType(moveList[j].move)][to_sq(moveList[j].move)];
-				
-			if (score1 < score2) {
-				position = j;
-			}
-		}
-	
-		if (position != i) {
-		
-			move = moveList[i];
-			moveList[i] = moveList[position];
-			moveList[position] = move;
-		}
-	}
- */
+
 	return pos;
 }
 
@@ -89,9 +54,9 @@ u8 genAttacks(Move *moveList, u8 pos, u8 sideToMove) {
     
 	int start = pos;
 	
-	pos = genPawnAttacks(moveList, pos, sideToMove);
 	pos = genPromotionsAttacks(moveList, pos, sideToMove);
 	pos = genEnpassantMoves(moveList, pos, sideToMove);
+	pos = genPawnAttacks(moveList, pos, sideToMove);
 	pos = genKnightAttacks(moveList, pos, sideToMove);
     pos = genBishopAttacks(moveList, pos, sideToMove);
     pos = genRookAttacks(moveList, pos, sideToMove);
@@ -105,7 +70,7 @@ u8 genAttacks(Move *moveList, u8 pos, u8 sideToMove) {
 		aPiece = pieceType(moveList[i].move);
 		cPiece = cPieceType(moveList[i].move);
 
-		if(pieceVal[aPiece] > pieceVal[cPiece]){
+		if(pieceVal[aPiece] >= pieceVal[cPiece]) {
 			
 			moveList[i].score = seeCapture(moveList[i].move, sideToMove);
 		} else {
@@ -120,22 +85,20 @@ u8 genAttacks(Move *moveList, u8 pos, u8 sideToMove) {
 u8 genAttacksQuies(Move *moveList, u8 sideToMove) {
     
 	u8 pos = 0;
-	
+
+	pos = genPromotionsAttacks(moveList, pos, sideToMove);
+	pos = genEnpassantMoves(moveList, pos, sideToMove);
+	pos = genPawnAttacks(moveList, pos, sideToMove);
 	pos = genKnightAttacks(moveList, pos, sideToMove);
     pos = genBishopAttacks(moveList, pos, sideToMove);
     pos = genRookAttacks(moveList, pos, sideToMove);
     pos = genQueenAttacks(moveList, pos, sideToMove);
-    pos = genPawnAttacks(moveList, pos, sideToMove);
     pos = genKingAttacks(moveList, pos, sideToMove);
     
-	pos = genPromotionsAttacks(moveList, pos, sideToMove);
-    pos = genEnpassantMoves(moveList, pos, sideToMove);
-	
     return pos;
 }
 
 /* pushes aka normal/quiet moves */
-
 u8 genKingPushes(Move *moveList, u8 pos, u8 sideToMove) {
     
     u64 king_bb = pieceBB[sideToMove][KING];
@@ -749,7 +712,7 @@ u8 genCastlingMoves(Move *moveList, u8 pos, u8 sideToMove) {
                     
                     u32 move = createMove(0, 0, MOVE_CASTLE, WHITE, ROOKS, KING, 4, 2);
                     moveList[pos++].move = move;
-                }
+            }
         }
         
         if (moveStack[ply].castleFlags & CastleFlagWhiteKing) {
@@ -763,7 +726,6 @@ u8 genCastlingMoves(Move *moveList, u8 pos, u8 sideToMove) {
                     moveList[pos++].move = move;
                 }
         }
-        
     } else {
         
         if (moveStack[ply].castleFlags & CastleFlagBlackQueen) {

@@ -11,8 +11,8 @@
 #include <time.h>
 #include <string.h>
 
-#include "utility.h"
 #include "nonslidingmoves.h"
+#include "utility.h"
 #include "magicmoves.h"
 #include "make_unmake.h"
 #include "movegen.h"
@@ -22,7 +22,7 @@
 u64 rand64() {
     
     return rand() ^ ((u64)rand() << 15) ^ ((u64)rand() << 30) ^
-    ((u64) rand() << 45) ^ ((u64)rand() << 60);
+    		((u64) rand() << 45) ^ ((u64)rand() << 60);
 }
 
 void print_bb(u64 board) {
@@ -641,12 +641,62 @@ void clearHistoryTable() {
 	}
 }
 
+u64 nortFill(u64 gen) {
+   gen |= (gen <<  8);
+   gen |= (gen << 16);
+   gen |= (gen << 32);
+   return gen;
+}
 
+u64 soutFill(u64 gen) {
+   gen |= (gen >>  8);
+   gen |= (gen >> 16);
+   gen |= (gen >> 32);
+   return gen;
+}
 
+u64 soutOne (u64 b) {return  b >> 8;}
+u64 nortOne (u64 b) {return  b << 8;}
+u64 eastOne (u64 b) {return (b << 1) & NOT_A_FILE;}
+u64 westOne (u64 b) {return (b >> 1) & NOT_H_FILE;}
+u64 noEaOne (u64 b) {return (b << 9) & NOT_A_FILE;}
+u64 soEaOne (u64 b) {return (b >> 7) & NOT_A_FILE;}
+u64 soWeOne (u64 b) {return (b >> 9) & NOT_H_FILE;}
+u64 noWeOne (u64 b) {return (b << 7) & NOT_H_FILE;}
 
+u64 wFrontSpans(u64 wpawns) {return nortOne (nortFill(wpawns));}
+u64 bRearSpans (u64 bpawns) {return nortOne (nortFill(bpawns));}
+u64 bFrontSpans(u64 bpawns) {return soutOne (soutFill(bpawns));}
+u64 wRearSpans (u64 wpawns) {return soutOne (soutFill(wpawns));}
 
+u64 wFrontFill(u64 wpawns) {return nortFill(wpawns);}
+u64 wRearFill (u64 wpawns) {return soutFill(wpawns);}
 
+u64 bFrontFill(u64 bpawns) {return soutFill(bpawns);}
+u64 bRearFill (u64 bpawns) {return nortFill(bpawns);}
 
+u64 fileFill(u64 gen) {
+   return nortFill(gen) | soutFill(gen);
+}
+
+u64 wEastAttackFrontSpans (u64 wpawns) {return eastOne(wFrontSpans(wpawns));}
+u64 wWestAttackFrontSpans (u64 wpawns) {return westOne(wFrontSpans(wpawns));}
+u64 bEastAttackFrontSpans (u64 bpawns) {return eastOne(bFrontSpans(bpawns));}
+u64 bWestAttackFrontSpans (u64 bpawns) {return westOne(bFrontSpans(bpawns));}
+
+u64 wEastAttackRearSpans (u64 wpawns)  {return eastOne(wRearFill(wpawns));}
+u64 wWestAttackRearSpans (u64 wpawns)  {return westOne(wRearFill(wpawns));}
+u64 bEastAttackRearSpans (u64 bpawns)  {return eastOne(bRearFill(bpawns));}
+u64 bWestAttackRearSpans (u64 bpawns)  {return westOne(bRearFill(bpawns));}
+
+u64 eastAttackFileFill (u64 pawns) {return eastOne(fileFill(pawns));}
+u64 westAttackFileFill (u64 pawns) {return westOne(fileFill(pawns));}
+
+u64 wPawnEastAttacks(u64 wpawns) {return noEaOne(wpawns);}
+u64 wPawnWestAttacks(u64 wpawns) {return noWeOne(wpawns);}
+
+u64 bPawnEastAttacks(u64 bpawns) {return soEaOne(bpawns);}
+u64 bPawnWestAttacks(u64 bpawns) {return soWeOne(bpawns);}
 
 
 

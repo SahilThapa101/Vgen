@@ -10,16 +10,7 @@
 #define nonslidingmoves_h
 
 #include "globals.h"
-
-u64 soutOne(u64 bb);
-u64 nortOne(u64 bb);
-u64 eastOne(u64 bb);
-u64 westOne(u64 bb);
-
-u64 noEaOne(u64 bb);
-u64 noWeOne(u64 bb);
-u64 soEaOne(u64 bb);
-u64 soWeOne(u64 bb);
+#include "evaluate.h"
 
 u64 get_king_attacks(int sq);
 u64 king_attacks(u64 kingSet);
@@ -42,12 +33,6 @@ u64 wPawnsAble2DblPush(u64 wpawns, u64 empty);
 
 u64 bPawnsAble2Push(u64 bpawns, u64 empty);
 u64 bPawnsAble2DblPush(u64 bpawns, u64 empty);
-
-u64 wPawnEastAttacks(u64 wpawns);
-u64 wPawnWestAttacks(u64 wpawns);
-
-u64 bPawnEastAttacks(u64 bpawns);
-u64 bPawnWestAttacks(u64 bpawns);
 
 u64 wPawnAnyAttacks(u64 wpawns);
 u64 wPawnDblAttacks(u64 wpawns);

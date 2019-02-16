@@ -7,6 +7,7 @@
 //
 
 #include "nonslidingmoves.h"
+#include "utility.h"
 
 //https://chessprogramming.wikispaces.com/General+Setwise+Operations#OneStepOnly
 const u64 notAFile = C64(0xfefefefefefefefe); // ~0x0101010101010101
@@ -14,38 +15,6 @@ const u64 notHFile = C64(0x7f7f7f7f7f7f7f7f); // ~0x8080808080808080
 
 u64 arrKingAttacks[64];
 u64 arrKnightAttacks[64];
-
-u64 soutOne(u64 bb) {
-    return bb >> 8;
-}
-
-u64 nortOne(u64 bb) {
-    return bb << 8;
-}
-
-u64 eastOne(u64 bb) {
-    return (bb << 1) & notAFile;
-}
-
-u64 westOne(u64 bb) {
-    return (bb >> 1) & notHFile;
-}
-
-u64 noEaOne(u64 bb) {
-    return (bb << 9) & notAFile;
-}
-
-u64 noWeOne(u64 bb) {
-    return (bb << 7) & notHFile;
-}
-
-u64 soEaOne(u64 bb) {
-    return (bb >> 7) & notAFile;
-}
-
-u64 soWeOne(u64 bb) {
-    return (bb >> 9) & notHFile;
-}
 
 //https://chessprogramming.wikispaces.com/King+Pattern
 
@@ -144,22 +113,6 @@ u64 bPawnsAble2DblPush(u64 bpawns, u64 empty) {
 }
 
 // compute and return attacks for pawns
-
-u64 wPawnEastAttacks(u64 wpawns) {
-    return noEaOne(wpawns);
-}
-
-u64 wPawnWestAttacks(u64 wpawns) {
-    return noWeOne(wpawns);
-}
-
-u64 bPawnEastAttacks(u64 bpawns) {
-    return soEaOne(bpawns);
-}
-
-u64 bPawnWestAttacks(u64 bpawns) {
-    return soWeOne(bpawns);
-}
 
 u64 wPawnAnyAttacks(u64 wpawns) {
     return wPawnEastAttacks(wpawns) | wPawnWestAttacks(wpawns);
