@@ -100,6 +100,7 @@ void parsePosition(char* lineIn) {
 
 	clearKillerMovesTable();
 	clearHistoryTable();
+	clearCounterMoveTable();
 	clearHashTable();
 	clearRepetitionHashTable();
 

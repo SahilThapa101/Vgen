@@ -52,6 +52,7 @@ void RecordHash(u8 sideToMove, int depth, int value, int hashf, Move bestMove, u
     phashe->flags = hashf;
     phashe->depth = depth;
 }
+
 bool checkForRepetition(u64 key, u8 sideToMove) {
 
 	if(sideToMove) {

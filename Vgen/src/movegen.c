@@ -20,8 +20,8 @@ u8 genMoves(Move *moveList, u8 sideToMove) {
     u32 pos = 0;
     
     pos = genAttacks(moveList, pos, sideToMove);
-	pos = genPushes(moveList, pos, sideToMove);
     pos = genSpecialMoves(moveList, pos, sideToMove);
+	pos = genPushes(moveList, pos, sideToMove);
 	
     return pos;
 }

@@ -641,6 +641,18 @@ void clearHistoryTable() {
 	}
 }
 
+void clearCounterMoveTable() {
+	
+	for(u8 i = 0; i < 2; i++) {
+		for(u8 j = 0; j < 8; j++) {
+			for(u8 k = 0; k < 64; k++) {
+	
+				counterMove[i][j][k] = 0UL;
+			}
+		}
+	}
+}
+
 u64 nortFill(u64 gen) {
    gen |= (gen <<  8);
    gen |= (gen << 16);

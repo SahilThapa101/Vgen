@@ -120,6 +120,7 @@ typedef struct {
     u8 castleFlags;
     u8 prevCastleFlags;
 	u8 epFlag;
+	u32 move;
     u64 epSquare;
 } MOVE_STACK;
 
@@ -142,7 +143,8 @@ MOVE_STACK moveStack[MAX_PLY];
 KILLER killerMoves[MAX_PLY];
 
 u64 historyScore[2][8][64];
-
+u32 counterMove[2][8][64];
+				
 u8 rookCastleFlagMask[64];
 
 #define CastleFlagWhiteKing 2

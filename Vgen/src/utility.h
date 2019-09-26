@@ -42,7 +42,7 @@ void clearRepetitionHashTable(void);
 void clearKillerMovesTable(void);
 void initHashKey(void);
 void clearHistoryTable();
-void clearCounterMoveHistoryTable();
+void clearCounterMoveTable();
 
 u64 soutOne (u64 b);
 u64 nortOne (u64 b);
